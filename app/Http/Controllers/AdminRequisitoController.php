@@ -3,65 +3,136 @@
 namespace App\Http\Controllers;
 
 use App\Models\Requisito;
+use App\Models\TipoSolicitud;
 use Illuminate\Http\Request;
 
 class AdminRequisitoController extends Controller
 {
-    // Mostrar todos los requisitos (Equivale a $_GET['action'] == 'listar')
+    /**
+     * Listar todos los requisitos configurados en el sistema.
+     */
     public function index()
     {
-        // Eloquent hace el "SELECT * ORDER BY" automáticamente
-        $requisitos = Requisito::orderBy('req_nombre_requisito', 'ASC')->get();
-        
-        // Retornamos la vista (HTML) y le pasamos la variable
+        // Cargamos cada requisito junto con los tipos de trámite a los que está asignado
+        $requisitos = Requisito::with('tiposSolicitud')
+                               ->orderBy('req_nombre_requisito', 'ASC')
+                               ->get();
+
         return view('admin.requisitos.index', compact('requisitos'));
     }
 
-    // Guardar un requisito nuevo (Equivale al bloque INSERT del POST)
-    public function store(Request $request)
+    /**
+     * Mostrar el formulario para crear un nuevo requisito.
+     */
+    public function create()
     {
-        // Laravel valida los campos por ti, sin usar if ($nombre === '')
-        $request->validate([
-            'nombre_tramite' => 'required|string',
-            'documentos_necesarios' => 'required|string',
-        ]);
+        // Traemos los tipos de solicitud disponibles para poder asignarlos en el formulario
+        $tiposSolicitud = TipoSolicitud::orderBy('tsi_nombre_tipo')->get();
 
-        // Insertamos en la BD mapeando los inputs a tus columnas personalizadas
-        Requisito::create([
-            'req_nombre_requisito' => $request->nombre_tramite,
-            'req_descripcion' => $request->documentos_necesarios,
-        ]);
-
-        return redirect()->route('admin.requisitos.index')
-                         ->with('success', '¡Trámite y requisitos agregados con éxito!');
+        return view('admin.requisitos.create', compact('tiposSolicitud'));
     }
 
-    // Actualizar un requisito (Equivale al bloque UPDATE del POST)
+    /**
+     * Guardar un requisito nuevo y su asignación a tipos de trámite (tabla pivote).
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'req_nombre_requisito' => 'required|string|max:100',
+            'req_descripcion'      => 'nullable|string',
+            'req_formato_esperado' => 'nullable|string|max:50',
+            'tipos'                => 'nullable|array',
+        ]);
+
+        $requisito = Requisito::create([
+            'req_nombre_requisito' => $request->req_nombre_requisito,
+            'req_descripcion'      => $request->req_descripcion,
+            'req_formato_esperado' => $request->req_formato_esperado,
+        ]);
+
+        // Sincronizamos la tabla pivote con los tipos de trámite elegidos.
+        // 'tipos' es un array [tsi_id => 'on'], 'obligatorios' es [tsi_id => '1'|'0'].
+        $this->sincronizarTipos($requisito, $request);
+
+        return redirect()->route('admin.requisitos.index')
+                         ->with('success', 'Requisito creado y asignado a los trámites seleccionados.');
+    }
+
+    /**
+     * Mostrar el formulario para editar un requisito existente.
+     */
+    public function edit($id)
+    {
+        $requisito = Requisito::with('tiposSolicitud')->findOrFail($id);
+        $tiposSolicitud = TipoSolicitud::orderBy('tsi_nombre_tipo')->get();
+
+        // Guardamos en un array los tsi_id ya asignados para marcar las casillas
+        $asignados = $requisito->tiposSolicitud->pluck('tsi_id')->map(fn ($v) => (string) $v)->toArray();
+
+        // Guardamos qué trámites exigen este requisito de forma obligatoria
+        $obligatorios = $requisito->tiposSolicitud
+            ->filter(fn ($tipo) => $tipo->pivot->tsr_es_obligatorio)
+            ->pluck('tsi_id')
+            ->map(fn ($v) => (string) $v)
+            ->toArray();
+
+        return view('admin.requisitos.edit', compact('requisito', 'tiposSolicitud', 'asignados', 'obligatorios'));
+    }
+
+    /**
+     * Actualizar un requisito existente y sus asignaciones a tipos de trámite.
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nombre_tramite' => 'required|string',
-            'documentos_necesarios' => 'required|string',
+            'req_nombre_requisito' => 'required|string|max:100',
+            'req_descripcion'      => 'nullable|string',
+            'req_formato_esperado' => 'nullable|string|max:50',
+            'tipos'                => 'nullable|array',
         ]);
 
-        // Buscamos por tu Primary Key (req_id) y actualizamos
         $requisito = Requisito::findOrFail($id);
         $requisito->update([
-            'req_nombre_requisito' => $request->nombre_tramite,
-            'req_descripcion' => $request->documentos_necesarios,
+            'req_nombre_requisito' => $request->req_nombre_requisito,
+            'req_descripcion'      => $request->req_descripcion,
+            'req_formato_esperado' => $request->req_formato_esperado,
         ]);
 
+        $this->sincronizarTipos($requisito, $request);
+
         return redirect()->route('admin.requisitos.index')
-                         ->with('success', '¡Requisitos actualizados con éxito!');
+                         ->with('success', 'Requisito actualizado correctamente.');
     }
 
-    // Eliminar un requisito (Equivale a $_GET['action'] == 'eliminar')
+    /**
+     * Eliminar un requisito. La tabla pivote se limpia sola gracias a onDelete('cascade').
+     */
     public function destroy($id)
     {
         $requisito = Requisito::findOrFail($id);
         $requisito->delete();
 
         return redirect()->route('admin.requisitos.index')
-                         ->with('success', 'Trámite eliminado correctamente.');
+                         ->with('success', 'Requisito eliminado correctamente.');
+    }
+
+    /**
+     * Guarda la relación Muchos a Muchos en tipo_solicitud_requisitos.
+     * Recibe el array 'tipos' (tsi_id => 'on') y 'obligatorios' (tsi_id => '1'|'0').
+     */
+    private function sincronizarTipos(Requisito $requisito, Request $request)
+    {
+        $tipos = $request->input('tipos', []);
+        $obligatorios = $request->input('obligatorios', []);
+
+        $datosPivote = [];
+        foreach (array_keys($tipos) as $tsiId) {
+            $datosPivote[$tsiId] = [
+                'tsr_es_obligatorio' => isset($obligatorios[$tsiId]) ? 1 : 0,
+            ];
+        }
+
+        // sync() reemplaza las asignaciones: agrega las nuevas y quita las que ya no están
+        $requisito->tiposSolicitud()->sync($datosPivote);
     }
 }
