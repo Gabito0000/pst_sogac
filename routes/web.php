@@ -59,20 +59,3 @@ Route::get('/prueba-chat-admin', function () {
 });
 // TEMPORAL ^^^
 
-/*
-Route::get('/', function () {
-    return view('welcome');
-});
-*/
-
-//User routes
-Route::prefix('user')->group(function () {
-
-    Route::get('/', function () {
-        return view('user.usrDashboard');
-    });
-
-    Route::get('/dateTemplate', function () {
-        return view('user.dateTemplate');
-    });
-});
