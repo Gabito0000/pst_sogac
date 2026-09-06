@@ -1,5 +1,6 @@
 <?php
 
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
@@ -32,6 +33,10 @@ Route::prefix('admin')->group(function () {
 // Soporte / Preguntas frecuentes
 Route::resource('soporte', PreguntasFrecuentesController::class);
 
+// Rutas de Registro
+Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
+Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
+// LOGIN
 
 // TEMPORAL VVV
 Route::get('/prueba-chat-usuario', function () {
@@ -42,6 +47,8 @@ Route::get('/prueba-chat-usuario', function () {
     ];
     return view('soporte\chat_usuario', compact('hilo'));
 });
+//LOGOUT RAPIDO DE DEPURACION
+
 
 Route::get('/prueba-chat-admin', function () {
     $hilo = (object) [
