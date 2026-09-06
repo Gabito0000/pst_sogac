@@ -17,7 +17,8 @@
       
       <nav class="nav">
         <a href="{{ route('admin.dashboard') }}">Gestión Solicitudes</a>
-        <a href="{{ route('admin.requisitos.index') }}" class="btn btn--primary btn--sm">Gestionar Requisitos</a>
+        <a href="{{ route('admin.tipos-solicitud.index') }}" class="btn btn--primary btn--sm">Gestionar Trámites</a>
+        <a href="{{ route('admin.requisitos.index') }}" class="btn btn--dark btn--sm">Catálogo de Requisitos</a>
         
         {{-- Solo diseño: Nombre estático por ahora --}}
         <span class="nav__user">Admin: Nombre de Prueba</span>

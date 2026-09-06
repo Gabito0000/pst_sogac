@@ -4,52 +4,42 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
+use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\PreguntasFrecuentesController;
 
-
-Route::get('/', function () {
-    Inertia::render('app');
-});
-
-//User routes
-Route::prefix('user')->group(function () {
-
-    Route::get('/dashboard', function () {
-        return Inertia::render('user/dashboard');
-    })->name('user.dashboard');
-});
-
-
-// Grupo protegido para el Admin
+// ============================================================
+// GRUPO ADMIN
+// Nota: El panel queda SIN autenticación local porque el acceso
+// se controlará con el doble inicio de sesión de la universidad
+// (SSO) una vez el sistema esté en producción. Si se necesita
+// proteger, basta con añadir ->middleware(['auth', 'admin'])
+// al grupo de abajo y crear las rutas de login/logout.
+// ============================================================
 Route::prefix('admin')->group(function () {
-    
-    // Rutas del Dashboard
+
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
 
-    // Rutas de Requisitos (Laravel mapea todo el CRUD automáticamente)
+    // CRUD completo de requisitos (Crear, Leer, Actualizar, Eliminar)
     Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
+
+    // CRUD de los TRÁMITES en sí (tipo_solicitudes): aquí es donde el admin
+    // crea el trámite, define su ventana de fechas y le asigna requisitos.
+    Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)->names('admin.tipos-solicitud');
+    Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
+        ->name('admin.tipos-solicitud.alternar-estado');
 });
 
+// Soporte / Preguntas frecuentes
 Route::resource('soporte', PreguntasFrecuentesController::class);
-// LOGIN
-use App\Http\Controllers\LoginController;
-
-Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
-Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
-
-use App\Http\Controllers\RegisterController;
 
 // Rutas de Registro
 Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
 Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
 // LOGIN
 
-
 // TEMPORAL VVV
 Route::get('/prueba-chat-usuario', function () {
-    // Simulamos un hilo en estado 'pendiente_cierre' para ver todos los botones
     $hilo = (object) [
         'hch_id' => 1,
         'hch_estado' => 'pendiente_cierre',
@@ -61,12 +51,28 @@ Route::get('/prueba-chat-usuario', function () {
 
 
 Route::get('/prueba-chat-admin', function () {
-    // Simulamos un hilo en estado 'activo' para ver el formulario de cierre
     $hilo = (object) [
         'hch_id' => 1,
         'hch_estado' => 'activo',
     ];
     return view('soporte\chat_admin', compact('hilo'));
 });
-
 // TEMPORAL ^^^
+
+/*
+Route::get('/', function () {
+    return view('welcome');
+});
+*/
+
+//User routes
+Route::prefix('user')->group(function () {
+
+    Route::get('/', function () {
+        return view('user.usrDashboard');
+    });
+
+    Route::get('/dateTemplate', function () {
+        return view('user.dateTemplate');
+    });
+});
