@@ -30,39 +30,7 @@ class UserSolicitudController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validación de entradas
-        $request->validate([
-            'tipo_solicitud' => 'required|exists:tipo_solicitudes,tsi_id',
-            'motivo' => 'required|string',
-            'documentos.*' => 'nullable|file|max:2048'
-        ]);
-
-        // 2. Creación del registro central
-        $nuevaSolicitud = Solicitud::create([
-            'sol_usu_id' => Auth::id(),
-            'sol_tsi_id' => $request->tipo_solicitud,
-            'sol_lac_id' => 1, // ID del Lapso académico actual
-            'sol_eso_id' => 1, // 1 = Estado "Pendiente" por defecto
-            'sol_id_seguimiento' => 'REQ-' . strtoupper(Str::random(6)),
-            'sol_motivo_detallado' => $request->motivo,
-        ]);
-
-        // 3. Procesamiento de archivos adjuntos
-        if ($request->hasFile('documentos')) {
-            foreach ($request->file('documentos') as $req_id => $archivo) {
-                $ruta = $archivo->store('solicitudes_adjuntos', 'public');
-                
-                Documentacion::create([
-                    'doc_sol_id' => $nuevaSolicitud->sol_id,
-                    'doc_nombre_original_archivo' => $archivo->getClientOriginalName(),
-                    'doc_ruta_almacenamiento_url' => $ruta,
-                ]);
-            }
-        }
-
-        // 4. Salida: Notificación de éxito
-        return redirect()->route('user.dashboard')
-            ->with('success', 'Tu solicitud fue aprobada y procesada. Código de seguimiento: ' . $nuevaSolicitud->sol_id_seguimiento);
+        //
     }
 
     /**
