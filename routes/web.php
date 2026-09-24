@@ -1,11 +1,22 @@
 <?php
 
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\PreguntasFrecuentesController;
+use App\Http\Controllers\UserSolicitudController;
+
+
+route::get('/', function () {
+    return view('app');
+});
+
+route::prefix('user')->group(function () {
+
+    route::get('/dashboard', function () { return view('user.index'); 
+    });
+});
 
 // ============================================================
 // GRUPO ADMIN
