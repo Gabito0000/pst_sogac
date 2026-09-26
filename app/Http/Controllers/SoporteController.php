@@ -19,15 +19,30 @@ class SoporteController extends Controller
 
     public function iniciarChat(Request $request) 
     {
+        // 1. El controlador valida que los datos HTTP sean correctos
+        $request->validate([
+            'mch_cuerpo' => 'required_without:imagen|string|nullable',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ], [
+            'mch_cuerpo.required_without' => 'Debes describir tu problema o adjuntar una imagen para abrir un nuevo ticket.'
+        ]);
+
         try {
-            $nuevoHilo = $this->soporteService->iniciarChat(Auth::id());
-            return redirect()->route('chat.mostrar', $nuevoHilo->hch_id);
+            // 2. Le pasamos los datos limpios al Servicio
+            $nuevoHilo = $this->soporteService->iniciarChat(
+                Auth::id(),
+                $request->mch_cuerpo,
+                $request->file('imagen')
+            );
+            
+            return redirect()->route('user.chat.mostrar', $nuevoHilo->hch_id);
+            
         } catch (Exception $e) {
             if ($e->getCode() == 409) {
-                $chatAbierto = HiloChat::where('hch_id_usuario', Auth::id())
+                $chatAbierto = \App\Models\ChatSoporte\HiloChat::where('hch_id_usuario', Auth::id())
                     ->whereIn('hch_estado', ['pendiente', 'activo', 'pendiente_cierre'])
                     ->first();
-                return redirect()->route('chat.mostrar', $chatAbierto->hch_id)
+                return redirect()->route('user.chat.mostrar', $chatAbierto->hch_id)
                                  ->with('info', $e->getMessage());
             }
             return back()->with('error', 'Ocurrió un error al iniciar el chat.');
@@ -59,7 +74,7 @@ class SoporteController extends Controller
     {
         try {
             $hilo = $this->soporteService->reclamarChat($hch_id, Auth::id());
-            return redirect()->route('chat.mostrar', $hilo->hch_id)
+            return redirect()->route('admin.chat.mostrar', $hilo->hch_id)
                              ->with('success', 'Has reclamado esta ayuda. Ahora puedes ayudar al usuario.');
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -109,7 +124,7 @@ class SoporteController extends Controller
         $hilos = $this->soporteService->obtenerHistorialPaginado($usuario);
         $estadoDashboard = $this->soporteService->obtenerEstadoBandejaSoporte($usuario);
 
-        return view('soporte.historial', array_merge(['hilos' => $hilos], $estadoDashboard));
+        return view('soporte.bandeja_entrada', array_merge(['hilos' => $hilos], $estadoDashboard));
     }
 
     public function mostrarChat($hch_id)

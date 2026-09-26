@@ -4,11 +4,12 @@ namespace App\Services;
 
 use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 class SoporteService
 {
-    public function iniciarChat($usuarioId)
+    public function iniciarChat($usuarioId, $cuerpo = null, $archivoImagen = null)
     {
         $chatAbierto = HiloChat::where('hch_id_usuario', $usuarioId)
             ->whereIn('hch_estado', ['pendiente', 'activo', 'pendiente_cierre'])
@@ -18,10 +19,22 @@ class SoporteService
             throw new Exception('Ya tienes una consulta de soporte en curso.', 409);
         }
 
-        return HiloChat::create([
-            'hch_id_usuario' => $usuarioId,
-            'hch_estado' => 'pendiente',
-        ]);
+        // Usamos una transacción para asegurar que Hilo y Mensaje se creen juntos o ninguno se cree
+        return DB::transaction(function () use ($usuarioId, $cuerpo, $archivoImagen) {
+            
+            // 1. Creamos el hilo
+            $hilo = HiloChat::create([
+                'hch_id_usuario' => $usuarioId,
+                'hch_estado' => 'pendiente',
+            ]);
+
+            // 2. Si el usuario envió un texto o imagen, creamos el primer mensaje usando tu otra función
+            if ($cuerpo || $archivoImagen) {
+                $this->enviarMensaje($hilo->hch_id, $usuarioId, $cuerpo, $archivoImagen);
+            }
+
+            return $hilo;
+        });
     }
 
     public function enviarMensaje($hiloId, $remitenteId, $cuerpo, $archivoImagen = null)

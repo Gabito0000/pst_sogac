@@ -18,6 +18,10 @@
       <nav class="nav">
         <a>Inicio</a>
         <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
+        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+          @csrf
+          <button type="submit" class="btn btn--ghost">Salir</button>
+        </form>
       </nav>
     </div>
   </header>

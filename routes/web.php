@@ -8,7 +8,7 @@ use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\UserSolicitudController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
-
+use App\Http\Controllers\SoporteController;
 
 Route::get('/', function () {
     return view('app');
@@ -23,6 +23,8 @@ Route::get('/', function () {
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
+Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
+Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
 
 // ============================================================
 // GRUPO ESTUDIANTE
@@ -35,6 +37,18 @@ Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
+    // Módulo de Soporte (Solo Lectura para usuarios)
+    Route::get('/soporte', [PreguntasFrecuentesController::class, 'index'])->name('soporte.index');
+    
+    // Módulo Chat Estudiante: URLs bajo /user/soporte/chat/...
+    Route::prefix('soporte/chat')->name('user.chat.')->group(function () {
+        Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
+        Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
+        Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
+        Route::post('/iniciar', [SoporteController::class, 'iniciarChat'])->name('iniciar');
+        Route::post('/{id}/confirmar', [SoporteController::class, 'confirmarCierre'])->name('confirmar');
+        Route::post('/{id}/rechazar', [SoporteController::class, 'desconfirmarCierre'])->name('rechazar');
+    });
 });
 
 // ============================================================
@@ -63,34 +77,18 @@ Route::prefix('admin')->group(function () {
         ->names('admin.tipos-solicitud');
     Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
         ->name('admin.tipos-solicitud.alternar-estado');
+    
+    // CRUD completo de Soporte (Admin)
+    Route::resource('soporte', PreguntasFrecuentesController::class)
+        ->except(['show'])
+        ->names('admin.soporte');
+
+    // Módulo Chat Admin: URLs bajo /admin/soporte/chat/...
+    Route::middleware('auth')->prefix('soporte/chat')->name('admin.chat.')->group(function () {
+        Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
+        Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
+        Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
+        Route::post('/{id}/reclamar', [SoporteController::class, 'reclamarChat'])->name('reclamar');
+        Route::post('/{id}/proponer-cierre', [SoporteController::class, 'proponerCierre'])->name('proponer_cierre');
+    });
 });
-
-// Soporte / Preguntas frecuentes
-Route::resource('soporte', PreguntasFrecuentesController::class);
-
-// Rutas de Registro
-Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
-Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
-// LOGIN
-
-// TEMPORAL VVV
-Route::get('/prueba-chat-usuario', function () {
-    $hilo = (object) [
-        'hch_id' => 1,
-        'hch_estado' => 'pendiente_cierre',
-        'hch_etiqueta_tema' => null
-    ];
-    return view('soporte\chat_usuario', compact('hilo'));
-});
-//LOGOUT RAPIDO DE DEPURACION
-
-
-Route::get('/prueba-chat-admin', function () {
-    $hilo = (object) [
-        'hch_id' => 1,
-        'hch_estado' => 'activo',
-    ];
-    return view('soporte\chat_admin', compact('hilo'));
-});
-// TEMPORAL ^^^
-
