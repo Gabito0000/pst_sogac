@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class SoporteService
 {
@@ -21,7 +21,7 @@ class SoporteService
 
         // Usamos una transacción para asegurar que Hilo y Mensaje se creen juntos o ninguno se cree
         return DB::transaction(function () use ($usuarioId, $cuerpo, $archivoImagen) {
-            
+
             // 1. Creamos el hilo
             $hilo = HiloChat::create([
                 'hch_id_usuario' => $usuarioId,
@@ -108,7 +108,7 @@ class SoporteService
             $hilo->update([
                 'hch_estado' => 'activo',
                 'hch_fecha_solicitud_cierre' => null,
-                'hch_etiqueta_tema' => null
+                'hch_etiqueta_tema' => null,
             ]);
         }
 
@@ -124,8 +124,8 @@ class SoporteService
         }
 
         return $query->with(['admin'])
-                     ->where('hch_id_usuario', $usuario->usu_id)
-                     ->paginate($porPagina);
+            ->where('hch_id_usuario', $usuario->usu_id)
+            ->paginate($porPagina);
     }
 
     public function obtenerEstadoBandejaSoporte($usuario)

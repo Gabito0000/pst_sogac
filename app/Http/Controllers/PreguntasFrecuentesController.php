@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\PreguntasFrecuentes\CreatePostRequest;
 use App\Http\Requests\PreguntasFrecuentes\UpdatePostRequest;
 use App\Services\PreguntasFrecuentesService;
 
 class PreguntasFrecuentesController extends Controller
 {
+    public function __construct(protected PreguntasFrecuentesService $service) {}
 
-    public function __construct(protected PreguntasFrecuentesService $service)
-    {}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $preguntas = $this->service->getAll();
+
         return view('soporte.preguntas_frecuentes', compact('preguntas'));
     }
 
@@ -33,10 +32,10 @@ class PreguntasFrecuentesController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(CreatePostRequest $request)
-    { 
+    {
         $this->service->create($request->validated());
 
-        return redirect()->route('soporte.index')->with('message','Pregunta añadida existosamente.');
+        return redirect()->route('soporte.index')->with('message', 'Pregunta añadida existosamente.');
     }
 
     /**
@@ -61,7 +60,7 @@ class PreguntasFrecuentesController extends Controller
     public function update(UpdatePostRequest $request, string $id)
     {
         // 1. Enviamos la ID y la data ya validada al servicio
-        $this->service->update((int)$id, $request->validated());
+        $this->service->update((int) $id, $request->validated());
 
         // 2. Redirigimos
         return redirect()->route('soporte.index')->with('message', 'Pregunta actualizada exitosamente.');
@@ -77,7 +76,7 @@ class PreguntasFrecuentesController extends Controller
             abort(403, 'No tienes permiso para eliminar preguntas.');
         }
         // 1. Enviamos la orden de eliminar al servicio
-        $this->service->delete((int)$id);
+        $this->service->delete((int) $id);
 
         // 2. Redirigimos
         return redirect()->route('soporte.index')->with('message', 'Pregunta eliminada exitosamente.');

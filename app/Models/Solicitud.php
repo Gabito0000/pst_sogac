@@ -7,21 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 class Solicitud extends Model
 {
     protected $table = 'solicitudes';
+
     protected $primaryKey = 'sol_id';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'sol_usu_id', 
-        'sol_tsi_id', 
-        'sol_lac_id', 
-        'sol_eso_id', 
-        'sol_id_seguimiento', 
-        'sol_motivo_detallado', 
-        'sol_prioridad', 
-        'sol_fecha_creacion', 
-        'sol_fecha_ultima_actualizacion', 
-        'sol_fecha_resolucion'
+        'sol_usu_id',
+        'sol_tsi_id',
+        'sol_lac_id',
+        'sol_eso_id',
+        'sol_id_seguimiento',
+        'sol_motivo_detallado',
+        'sol_prioridad',
+        'sol_fecha_creacion',
+        'sol_fecha_ultima_actualizacion',
+        'sol_fecha_resolucion',
     ];
+
     // Relaciones hacia arriba (Pertenece a...)
     public function usuario()
     {
@@ -52,5 +55,11 @@ class Solicitud extends Model
     public function documentaciones()
     {
         return $this->hasMany(Documentacion::class, 'doc_sol_id', 'sol_id');
+    }
+
+    // Una solicitud tiene como maximo una cita de validacion fisica
+    public function cita()
+    {
+        return $this->hasOne(Cita::class, 'cit_sol_id', 'sol_id');
     }
 }

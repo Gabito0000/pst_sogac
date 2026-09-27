@@ -1,14 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
-use App\Http\Controllers\PreguntasFrecuentesController;
-use App\Http\Controllers\UserSolicitudController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
+use App\Http\Controllers\UserSolicitudController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('app');
@@ -35,11 +35,12 @@ Route::post('/register', [RegisterController::class, 'registrar'])->name('regist
 // ============================================================
 Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
+    Route::get('/citas', [UserSolicitudController::class, 'misCitas'])->name('user.citas');
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
     // Módulo de Soporte (Solo Lectura para usuarios)
     Route::get('/soporte', [PreguntasFrecuentesController::class, 'index'])->name('soporte.index');
-    
+
     // Módulo Chat Estudiante: URLs bajo /user/soporte/chat/...
     Route::prefix('soporte/chat')->name('user.chat.')->group(function () {
         Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
@@ -77,7 +78,7 @@ Route::prefix('admin')->group(function () {
         ->names('admin.tipos-solicitud');
     Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
         ->name('admin.tipos-solicitud.alternar-estado');
-    
+
     // CRUD completo de Soporte (Admin)
     Route::resource('soporte', PreguntasFrecuentesController::class)
         ->except(['show'])

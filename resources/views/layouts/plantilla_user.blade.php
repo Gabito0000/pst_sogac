@@ -11,24 +11,33 @@
 <body>
   <header class="topbar">
     <div class="container topbar__inner">
-      <div class="brand">
+      <a href="{{ route('dashboard') }}" class="brand" style="text-decoration:none;">
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo</span>
-      </div>
+      </a>
       <nav class="nav">
-        <a>Inicio</a>
+        <a href="{{ route('dashboard') }}">Inicio</a>
+        <a href="{{ route('dashboard') }}#mis-solicitudes">Mis Solicitudes</a>
+        <a href="{{ route('user.citas') }}">Calendario</a>
+        <a href="{{ route('user.chat.index') }}">Ayuda</a>
         <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
-        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
           @csrf
-          <button type="submit" class="btn btn--ghost">Salir</button>
+          <button type="submit" class="btn btn--ghost btn--sm">Salir</button>
         </form>
       </nav>
     </div>
   </header>
 
-  <main class="main-content">
+  <main class="main container">
       @yield('content')
   </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles</p>
+    </div>
+  </footer>
 
 </body>
 </html>
