@@ -43,6 +43,11 @@
               <label for="password">Contraseña</label>
               <input type="password" id="password" name="password" required />
             </div>
+
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--gray-700);cursor:pointer;">
+              <input type="checkbox" name="remember" value="1" style="width:16px;height:16px;accent-color:var(--red);" />
+              Mantener sesión iniciada
+            </label>
             
             <button type="submit" class="btn btn--primary btn--block">Entrar</button>
           </form>

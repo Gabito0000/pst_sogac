@@ -18,6 +18,8 @@
       
       <nav class="nav">
         <a href="{{ route('admin.dashboard') }}">Gestión Solicitudes</a>
+        {{-- TODO tras pull del modulo chat: cambiar href="#" por {{ route('chat.historial') }} --}}
+        <a href="#">Chat Soporte</a>
         <a href="{{ route('admin.tipos-solicitud.index') }}" class="btn btn--primary btn--sm">Gestionar Trámites</a>
         <a href="{{ route('admin.requisitos.index') }}" class="btn btn--dark btn--sm">Catálogo de Requisitos</a>
         

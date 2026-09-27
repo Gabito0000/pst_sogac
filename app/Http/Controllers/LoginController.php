@@ -14,6 +14,7 @@ class LoginController extends Controller
         if (Auth::check()) {
             return $this->redireccionarSegunRol(Auth::user());
         }
+
         return view('auth.login');
     }
 
@@ -23,18 +24,21 @@ class LoginController extends Controller
         // Validamos que los campos no vengan vacíos[cite: 4]
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         // Mapeamos los datos del formulario con las columnas de tu migración[cite: 5]
         $credenciales = [
             'usu_correo_electronico' => $request->email,
-            'password' => $request->password 
+            'password' => $request->password,
         ];
 
         // Auth::attempt verifica el hash de bcrypt automáticamente[cite: 4]
-        if (Auth::attempt($credenciales)) {
+        // El 2do parametro activa "recuerdame" si el estudiante marco el
+        // checkbox: la sesion sobrevive aunque cierre el navegador.
+        if (Auth::attempt($credenciales, $request->boolean('remember'))) {
             $request->session()->regenerate(); // Evita ataques de fijación de sesión
+
             return $this->redireccionarSegunRol(Auth::user());
         }
 
@@ -49,6 +53,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/login');
     }
 
@@ -58,6 +63,7 @@ class LoginController extends Controller
         if ($usuario->usu_rol === 'admin') {
             return redirect()->route('admin.dashboard');
         }
+
         return redirect()->route('dashboard');
     }
 }

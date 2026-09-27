@@ -1,14 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
-use App\Http\Controllers\PreguntasFrecuentesController;
-use App\Http\Controllers\UserSolicitudController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
-
+use App\Http\Controllers\UserSolicitudController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('app');
@@ -33,6 +32,7 @@ Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')
 // ============================================================
 Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
+    Route::get('/citas', [UserSolicitudController::class, 'misCitas'])->name('user.citas');
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
 });
@@ -93,4 +93,3 @@ Route::get('/prueba-chat-admin', function () {
     return view('soporte\chat_admin', compact('hilo'));
 });
 // TEMPORAL ^^^
-
