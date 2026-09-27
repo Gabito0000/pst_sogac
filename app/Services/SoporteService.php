@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class SoporteService
 {
-    public function iniciarChat($usuarioId)
+    public function iniciarChat($usuarioId, $cuerpo = null, $archivoImagen = null)
     {
         $chatAbierto = HiloChat::where('hch_id_usuario', $usuarioId)
             ->whereIn('hch_estado', ['pendiente', 'activo', 'pendiente_cierre'])
@@ -18,10 +19,22 @@ class SoporteService
             throw new Exception('Ya tienes una consulta de soporte en curso.', 409);
         }
 
-        return HiloChat::create([
-            'hch_id_usuario' => $usuarioId,
-            'hch_estado' => 'pendiente',
-        ]);
+        // Usamos una transacción para asegurar que Hilo y Mensaje se creen juntos o ninguno se cree
+        return DB::transaction(function () use ($usuarioId, $cuerpo, $archivoImagen) {
+
+            // 1. Creamos el hilo
+            $hilo = HiloChat::create([
+                'hch_id_usuario' => $usuarioId,
+                'hch_estado' => 'pendiente',
+            ]);
+
+            // 2. Si el usuario envió un texto o imagen, creamos el primer mensaje usando tu otra función
+            if ($cuerpo || $archivoImagen) {
+                $this->enviarMensaje($hilo->hch_id, $usuarioId, $cuerpo, $archivoImagen);
+            }
+
+            return $hilo;
+        });
     }
 
     public function enviarMensaje($hiloId, $remitenteId, $cuerpo, $archivoImagen = null)
@@ -95,7 +108,7 @@ class SoporteService
             $hilo->update([
                 'hch_estado' => 'activo',
                 'hch_fecha_solicitud_cierre' => null,
-                'hch_etiqueta_tema' => null
+                'hch_etiqueta_tema' => null,
             ]);
         }
 
@@ -111,8 +124,8 @@ class SoporteService
         }
 
         return $query->with(['admin'])
-                     ->where('hch_id_usuario', $usuario->usu_id)
-                     ->paginate($porPagina);
+            ->where('hch_id_usuario', $usuario->usu_id)
+            ->paginate($porPagina);
     }
 
     public function obtenerEstadoBandejaSoporte($usuario)

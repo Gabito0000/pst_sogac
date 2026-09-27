@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('preguntas_frecuentes', function (Blueprint $table) {
             $table->id();
             $table->string('pregunta');
-            $table->string('respuesta');
+            $table->text('respuesta');
             $table->timestamps();
         });
     }

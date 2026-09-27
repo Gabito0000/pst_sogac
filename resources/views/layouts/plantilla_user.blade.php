@@ -19,8 +19,7 @@
         <a href="{{ route('dashboard') }}">Inicio</a>
         <a href="{{ route('dashboard') }}#mis-solicitudes">Mis Solicitudes</a>
         <a href="{{ route('user.citas') }}">Calendario</a>
-        {{-- TODO tras pull del modulo chat: cambiar href="#" por {{ route('chat.historial') }} --}}
-        <a href="#">Ayuda</a>
+        <a href="{{ route('user.chat.index') }}">Ayuda</a>
         <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
         <form action="{{ route('logout') }}" method="POST" style="margin:0;">
           @csrf

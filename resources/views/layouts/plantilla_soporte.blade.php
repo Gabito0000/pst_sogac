@@ -18,16 +18,17 @@
         <span class="brand__name">Solicítalo <span style="font-size: 0.8rem; background: var(--red); padding: 2px 8px; border-radius: 4px;">SOPORTE</span></span>
       </a>
       
-      <nav class="nav">
-        <!-- Enlace seguro a tu recurso de soporte -->
-        <a href="{{ route('soporte.index') }}">Preguntas Frecuentes</a>
-        
+      <nav class="nav">        
         <!-- Bloque seguro: Solo intenta mostrar el nombre si hay alguien logueado -->
         @auth
-            <span class="nav__user">Usuario: {{ auth()->user()->nombre ?? 'Admin' }}</span>
+            <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
         @else
             <span class="nav__user">Modo Invitado</span>
         @endauth
+        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+          @csrf
+          <button type="submit" class="btn btn--ghost">Salir</button>
+        </form>
       </nav>
     </div>
   </header>
