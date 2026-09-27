@@ -17,12 +17,15 @@
       </a>
       
       <nav class="nav">
-        <a href="{{ route('admin.dashboard') }}">Gestión Solicitudes</a>
         <a href="{{ route('admin.tipos-solicitud.index') }}" class="btn btn--primary btn--sm">Gestionar Trámites</a>
-        <a href="{{ route('admin.requisitos.index') }}" class="btn btn--dark btn--sm">Catálogo de Requisitos</a>
+        <a href="{{ route('admin.requisitos.index') }}" class="btn btn--primary btn--sm">Catálogo de Requisitos</a>
+        <a href="{{ route('admin.chat.index') }}" class="btn btn--primary btn--sm">Bandeja de Soporte</a>
         
-        {{-- Solo diseño: Nombre estático por ahora --}}
-        <span class="nav__user">Admin: Nombre de Prueba</span>
+        @auth
+            <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
+        @else
+            <span class="nav__user">Modo Invitado</span>
+        @endauth
         
         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
           @csrf

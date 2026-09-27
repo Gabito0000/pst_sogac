@@ -18,7 +18,7 @@ class PreguntasFrecuentesController extends Controller
     public function index()
     {
         $preguntas = $this->service->getAll();
-        return view('soporte\preguntas_frecuentes', compact('preguntas'));
+        return view('soporte.preguntas_frecuentes', compact('preguntas'));
     }
 
     /**

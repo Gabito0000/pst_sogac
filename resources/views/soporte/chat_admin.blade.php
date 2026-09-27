@@ -3,8 +3,19 @@
 @section('title', 'Atender Ticket')
 
 @section('content')
-<div class="container" style="padding: 2rem 0; display: flex; gap: 20px; flex-wrap: wrap;">
+<div class="container" style="padding: 2rem 0;">
     
+    <!-- Botón de regresar -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ route('admin.chat.index') }}" style="text-decoration: none; color: var(--gray-700); display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 8px 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dee2e6;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Volver a la bandeja
+        </a>
+    </div>
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
     <!-- Columna Izquierda: El Chat -->
     <div style="flex: 1; min-width: 300px;">
         <h2>Atendiendo Ticket #{{ $hilo->hch_id }}</h2>
@@ -55,7 +66,7 @@
         </div>
 
         @if($hilo->hch_estado === 'activo')
-            <form action="{{ route('chat.enviar', $hilo->hch_id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px;">
+            <form action="{{ route('admin.chat.enviar', $hilo->hch_id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px;">
                 @csrf
                 <textarea name="mch_cuerpo" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" placeholder="Escribe la respuesta al usuario..."></textarea>
                 <div>
@@ -72,7 +83,7 @@
             <div style="background: #e9ecef; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
                 <h3 style="margin-top: 0;">Acciones de Admin</h3>
                 <p style="font-size: 0.9rem;">Si el problema fue resuelto, puedes proponer el cierre del ticket.</p>
-                <form action="{{ route('chat.proponer_cierre', $hilo->hch_id) }}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                <form action="{{ route('admin.chat.proponer_cierre', $hilo->hch_id) }}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
                     <label style="font-weight: bold; font-size: 0.9rem;">Etiqueta del tema:</label>
                     <input type="text" name="etiqueta_tema" placeholder="Ej: Error de sistema" required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
                     <button type="submit" style="background: #ffc107; color: #000; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">Solicitar Cierre</button>

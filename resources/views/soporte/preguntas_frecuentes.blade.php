@@ -56,32 +56,35 @@
                 </div>
             </details>
 
-            <!-- Formulario de Eliminación oculto -->
-            <form id="form-eliminar-{{ $pregunta->id }}" method="POST" action="{{ route('soporte.destroy', $pregunta->id) }}" style="display:none;">
-                @csrf @method('DELETE')
-            </form>
+            <!-- Solo renderizamos los formularios de edición y eliminación si es admin -->
+            @if(auth()->check() && auth()->user()->usu_rol === 'admin')
+                <!-- Formulario de Eliminación oculto -->
+                <form id="form-eliminar-{{ $pregunta->id }}" method="POST" action="{{ route('admin.soporte.destroy', $pregunta->id) }}" style="display:none;">
+                    @csrf @method('DELETE')
+                </form>
 
-            <!-- Modal de Edición animado -->
-            <div id="modalEditar{{ $pregunta->id }}" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
-                <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);">
-                    <h3 class="card__title">Editar Pregunta</h3>
-                    <form method="POST" action="{{ route('soporte.update', $pregunta->id) }}" class="form" style="margin-top: 20px;">
-                        @csrf @method('PUT')
-                        <div class="field">
-                            <label>Pregunta</label>
-                            <input type="text" name="pregunta" value="{{ $pregunta->pregunta }}" required>
-                        </div>
-                        <div class="field">
-                            <label>Respuesta</label>
-                            <textarea name="respuesta" required>{{ $pregunta->respuesta }}</textarea>
-                        </div>
-                        <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
-                            <button type="button" onclick="cerrarModal('modalEditar{{ $pregunta->id }}')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
-                            <button type="submit" class="btn btn--primary">Actualizar</button>
-                        </div>
-                    </form>
+                <!-- Modal de Edición animado -->
+                <div id="modalEditar{{ $pregunta->id }}" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
+                    <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);">
+                        <h3 class="card__title">Editar Pregunta</h3>
+                        <form method="POST" action="{{ route('admin.soporte.update', $pregunta->id) }}" class="form" style="margin-top: 20px;">
+                            @csrf @method('PUT')
+                            <div class="field">
+                                <label>Pregunta</label>
+                                <input type="text" name="pregunta" value="{{ $pregunta->pregunta }}" required>
+                            </div>
+                            <div class="field">
+                                <label>Respuesta</label>
+                                <textarea name="respuesta" required>{{ $pregunta->respuesta }}</textarea>
+                            </div>
+                            <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
+                                <button type="button" onclick="cerrarModal('modalEditar{{ $pregunta->id }}')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
+                                <button type="submit" class="btn btn--primary">Actualizar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            @endif
         @endforeach
     </div>
 
@@ -90,40 +93,43 @@
     </div>
 </div>
 
-<!-- Modal para Crear animado -->
-<div id="modalCrear" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
-    <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);">
-        <h3 class="card__title">Nueva Pregunta</h3>
-        <form method="POST" action="{{ route('soporte.store') }}" class="form" style="margin-top: 20px;">
-            @csrf
-            <div class="field">
-                <label>Pregunta</label>
-                <input type="text" name="pregunta" required placeholder="Ej: ¿Cómo restablezco mi contraseña?">
-            </div>
-            <div class="field">
-                <label>Respuesta</label>
-                <textarea name="respuesta" required placeholder="Detalla la solución..."></textarea>
-            </div>
-            <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
-                <button type="button" onclick="cerrarModal('modalCrear')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
-                <button type="submit" class="btn btn--primary">Guardar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Personalizado para Eliminar -->
-<div id="modalConfirmarEliminar" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
-    <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); border-top: 5px solid var(--red-dark);">
-        <h3 class="card__title" style="color: var(--red-dark);">Eliminar Pregunta</h3>
-        <p style="color: var(--gray-700); margin-top: 10px;">¿Estás totalmente seguro de que deseas eliminar esta pregunta? Esta acción no se puede deshacer.</p>
-        
-        <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
-            <button type="button" onclick="cerrarModal('modalConfirmarEliminar')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
-            <button type="button" onclick="ejecutarEliminacion()" class="btn btn--danger">Sí, Eliminar</button>
+<!-- Modales generales solo para administradores -->
+@if(auth()->check() && auth()->user()->usu_rol === 'admin')
+    <!-- Modal para Crear animado -->
+    <div id="modalCrear" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
+        <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);">
+            <h3 class="card__title">Nueva Pregunta</h3>
+            <form method="POST" action="{{ route('admin.soporte.store') }}" class="form" style="margin-top: 20px;">
+                @csrf
+                <div class="field">
+                    <label>Pregunta</label>
+                    <input type="text" name="pregunta" required placeholder="Ej: ¿Cómo restablezco mi contraseña?">
+                </div>
+                <div class="field">
+                    <label>Respuesta</label>
+                    <textarea name="respuesta" required placeholder="Detalla la solución..."></textarea>
+                </div>
+                <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" onclick="cerrarModal('modalCrear')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+
+    <!-- Modal Personalizado para Eliminar -->
+    <div id="modalConfirmarEliminar" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
+        <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); border-top: 5px solid var(--red-dark);">
+            <h3 class="card__title" style="color: var(--red-dark);">Eliminar Pregunta</h3>
+            <p style="color: var(--gray-700); margin-top: 10px;">¿Estás totalmente seguro de que deseas eliminar esta pregunta? Esta acción no se puede deshacer.</p>
+            
+            <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
+                <button type="button" onclick="cerrarModal('modalConfirmarEliminar')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
+                <button type="button" onclick="ejecutarEliminacion()" class="btn btn--danger">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+@endif
 
 <!-- Lógica de Interacción JS -->
 <script>
@@ -226,5 +232,42 @@
         from { opacity: 0; transform: translate(-50%, -60%) scale(0.9); }
         to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
+
+    /* ESTILOS DEL BOTÓN FLOTANTE DE CHAT */
+    .btn-flotante-chat {
+        position: fixed;
+        bottom: 80px;
+        right: 30px;
+        background-color: var(--red); /* Usa el rojo de tu paleta */
+        color: var(--white);
+        padding: 12px 24px;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        z-index: 9999;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-flotante-chat:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        color: var(--white);
+    }
 </style>
+
+<!-- Renderizar botón flotante SOLO si es un usuario/estudiante -->
+@if(auth()->check() && auth()->user()->usu_rol !== 'admin')
+    <a href="{{ route('user.chat.index') }}" class="btn-flotante-chat">
+        <span>¿Necesitas más ayuda?<br>¡Comunícate por el chat!</span>
+        <!-- Icono de mensaje -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </a>
+@endif
+
 @endsection
