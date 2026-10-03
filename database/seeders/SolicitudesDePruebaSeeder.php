@@ -24,7 +24,7 @@ class SolicitudesDePruebaSeeder extends Seeder
         // 1. Tipo de documento (necesario para crear usuarios)
         $cedula = TipoDocumento::firstOrCreate(
             ['tdo_abreviatura' => 'V'],
-            ['tdo_nombre_documento' => 'Cédula de Identidad']
+            ['tdo_nombre_documento' => 'Venezolano']
         );
 
         // 2. Estados de solicitud

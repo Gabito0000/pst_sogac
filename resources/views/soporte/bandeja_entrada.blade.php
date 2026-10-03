@@ -1,4 +1,4 @@
-@extends('layouts.plantilla_soporte')
+@extends('layouts.plantilla_general')
 
 @section('title', 'Centro de Soporte')
 

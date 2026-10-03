@@ -8,6 +8,7 @@ use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserSolicitudController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,7 +26,19 @@ Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.po
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
 Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
+use App\Http\Controllers\PasswordResetController;
 
+// 1. Mostrar formulario donde el usuario pone su correo
+Route::get('/olvide-mi-contrasena', [PasswordResetController::class, 'requestForm'])->name('password.request');
+
+// 2. Procesar el envío del enlace por correo
+Route::post('/olvide-mi-contrasena', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+
+// 3. Mostrar el formulario para escribir la nueva contraseña (viene del enlace del correo)
+Route::get('/restablecer-contrasena/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
+
+// 4. Procesar el cambio de contraseña en la base de datos
+Route::post('/restablecer-contrasena', [PasswordResetController::class, 'updatePassword'])->name('password.update');
 // ============================================================
 // GRUPO ESTUDIANTE
 // La ruta original apuntaba a view('user.index'), que no existe
@@ -92,4 +105,22 @@ Route::prefix('admin')->group(function () {
         Route::post('/{id}/reclamar', [SoporteController::class, 'reclamarChat'])->name('reclamar');
         Route::post('/{id}/proponer-cierre', [SoporteController::class, 'proponerCierre'])->name('proponer_cierre');
     });
+
+    //Modulo gestion usuarios
+    Route::prefix('/usuarios')->name('admin.usuarios.')->group(function () {
+    Route::get('/', [AdminUserController::class, 'index'])->name('index');
+    Route::get('/buscar', [AdminUserController::class, 'search'])->name('search'); // AJAX
+    
+    Route::put('/{usuario}', [AdminUserController::class, 'update'])->name('update');
+    Route::post('/{usuario}/desbloquear', [AdminUserController::class, 'unlock'])->name('unlock');
+    Route::delete('/{usuario}', [AdminUserController::class, 'destroy'])->name('destroy');
+    });
+});
+
+
+Route::get('/test-mail', function () {
+    \Illuminate\Support\Facades\Mail::raw('¡Tu conexión a Mailtrap funciona perfectamente!', function ($message) {
+        $message->to('test@solicitalo.com')->subject('Prueba Directa desde Laravel');
+    });
+    return 'Intento de envío ejecutado. Revisa Mailtrap o la terminal si sale algún error.';
 });

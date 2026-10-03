@@ -30,6 +30,10 @@ class Usuario extends Authenticatable
         'usu_fecha_registro',
         'usu_ultimo_acceso',
     ];
+    public function getEmailForPasswordReset()
+    {
+        return $this->usu_correo_electronico;
+    }
 
     public function hilosComoUsuario()
     {
@@ -75,5 +79,11 @@ class Usuario extends Authenticatable
     public function getAuthIdentifierName()
     {
         return 'usu_id';
+    }
+    
+    // Esto le dice al cartero de Laravel a qué dirección exacta enviar el mensaje
+    public function routeNotificationForMail($notification = null)
+    {
+        return $this->usu_correo_electronico;
     }
 }

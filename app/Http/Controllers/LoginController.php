@@ -2,50 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // Muestra la vista del formulario
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function mostrarFormulario()
     {
-        // Si ya está logueado, lo mandamos a su panel correspondiente[cite: 4]
         if (Auth::check()) {
             return $this->redireccionarSegunRol(Auth::user());
         }
-
         return view('auth.login');
     }
 
-    // Procesa los datos del POST
     public function procesarLogin(Request $request)
     {
-        // Validamos que los campos no vengan vacíos[cite: 4]
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'identificador' => 'required|string',
+            'password' => 'required|string',
         ]);
 
-        // Mapeamos los datos del formulario con las columnas de tu migración[cite: 5]
-        $credenciales = [
-            'usu_correo_electronico' => $request->email,
-            'password' => $request->password,
-        ];
-
-        // Auth::attempt verifica el hash de bcrypt automáticamente[cite: 4]
-        // El 2do parametro activa "recuerdame" si el estudiante marco el
-        // checkbox: la sesion sobrevive aunque cierre el navegador.
-        if (Auth::attempt($credenciales, $request->boolean('remember'))) {
-            $request->session()->regenerate(); // Evita ataques de fijación de sesión
-
+        if ($this->authService->attemptLogin($request->identificador, $request->password, $request->boolean('remember'))) {
+            $request->session()->regenerate();
             return $this->redireccionarSegunRol(Auth::user());
         }
 
-        // Si falla, devolvemos a la vista con el error[cite: 4]
         return back()->withErrors([
-            'email' => 'Credenciales incorrectas.',
-        ])->onlyInput('email');
+            'identificador' => 'Credenciales incorrectas o cuenta inactiva.',
+        ])->onlyInput('identificador');
     }
 
     public function cerrarSesion(Request $request)
@@ -53,17 +45,13 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect('/login');
     }
 
-    // Lógica de redirección inteligente según el rol[cite: 4]
     private function redireccionarSegunRol($usuario)
     {
-        if ($usuario->usu_rol === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
-        return redirect()->route('dashboard');
+        return $usuario->usu_rol === 'admin' 
+            ? redirect()->route('admin.dashboard') 
+            : redirect()->route('dashboard');
     }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.plantilla_admin')
+@extends('layouts.plantilla_general')
 
 @section('title', 'Panel de Administración')
 

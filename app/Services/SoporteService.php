@@ -6,6 +6,8 @@ use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NuevoMensajeSoporte;
 
 class SoporteService
 {
@@ -45,12 +47,23 @@ class SoporteService
             $rutaImagen = $archivoImagen->store('chats', 'public');
         }
 
-        return MensajeChat::create([
+        $mensaje = MensajeChat::create([
             'mch_id_hilo' => $hiloId,
             'mch_id_remitente' => $remitenteId,
             'mch_cuerpo' => $cuerpo,
             'mch_ruta_imagen' => $rutaImagen,
         ]);
+
+        // --- NUEVA LÓGICA DE CORREO ---
+        // Cargamos el hilo con los datos de su creador
+        $hilo = HiloChat::with('usuario')->find($hiloId);
+
+        // Si el que envía el mensaje NO es el dueño del ticket (es decir, es el admin)
+        if ($hilo && $hilo->hch_id_usuario !== $remitenteId) {
+            Mail::to($hilo->usuario->usu_correo_electronico)->send(new NuevoMensajeSoporte($hilo->hch_id));
+        }
+
+        return $mensaje;
     }
 
     public function reclamarChat($hiloId, $adminId)

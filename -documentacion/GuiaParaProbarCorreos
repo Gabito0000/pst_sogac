@@ -1,0 +1,56 @@
+📧 Guía para Pruebas de Correo en Entorno Local (Mailtrap)
+
+Esta guía detalla cómo configurar el proyecto localmente para probar el envío de correos (recuperación de contraseña, notificaciones de soporte, etc.) de forma segura, interceptándolos en un buzón de pruebas sin enviar spam a cuentas reales.
+
+PASO 1: Configurar Mailtrap
+
+1. Ingresa a mailtrap.io y crea una cuenta gratuita.
+
+2. En tu panel principal de Mailtrap, busca la sección Email Sandbox.
+
+3. Haz clic en la bandeja predeterminada llamada My Inbox.
+
+4. En el menú desplegable Integrations, selecciona Laravel. Mailtrap generará automáticamente unas credenciales.
+
+PASO 2: Configurar el archivo .env local
+
+Abre el archivo .env en la raíz de tu proyecto, busca el bloque de configuración de correos y reemplázalo con tus credenciales de Mailtrap.
+
+⚠️ IMPORTANTE: Para que el sistema funcione correctamente, es obligatorio añadir un remitente y forzar el envío síncrono. Asegúrate de que tu bloque se vea exactamente así (cambiando solo tus credenciales de Mailtrap):
+
+    MAIL_MAILER=smtp
+    MAIL_HOST=sandbox.smtp.mailtrap.io
+    MAIL_PORT=2525
+    MAIL_USERNAME=tu_codigo_de_usuario
+    MAIL_PASSWORD=tu_codigo_de_contraseña
+    MAIL_ENCRYPTION=tls
+
+    # ---- REQUERIDO POR EL SISTEMA ----
+    MAIL_FROM_ADDRESS="soporte@elsistema.com"
+    MAIL_FROM_NAME="Soporte Técnico"
+    QUEUE_CONNECTION=sync
+
+PASO 3: Limpiar la caché (¡Paso Crítico!)
+
+Laravel almacena las configuraciones en memoria. Cada vez que edites el archivo .env, debes ejecutar este comando para que los cambios surtan efecto.
+
+Abre la terminal en la raíz del proyecto y detén el servidor (Ctrl + C). Luego ejecuta:
+
+    # Si usas PHP local (XAMPP, Laragon, etc):
+    php artisan config:clear
+
+    # Si usas Docker (Laravel Sail):
+    ./vendor/bin/sail artisan config:clear
+
+
+Vuelve a encender el servidor con php artisan serve (o sail up).
+
+PASO 4: Verificación
+
+Realiza cualquiera de estas acciones en el sistema:
+
+1. Ve a la pantalla de Login, haz clic en "Olvidé mi contraseña" y envía un correo.
+
+2. Ingresa como Administrador y responde a un Ticket de Soporte.
+
+Los correos no llegarán a tu cuenta real. Ve a la pestaña de My Inbox en Mailtrap y verás los correos llegar de forma instantánea.
