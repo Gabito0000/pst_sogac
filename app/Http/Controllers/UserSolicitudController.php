@@ -15,8 +15,12 @@ class UserSolicitudController extends Controller
 {
     /**
      * Panel del estudiante. Muestra únicamente los trámites que el admin
+<<<<<<< HEAD
+     * dejó ACTIVOS y dentro de su ventana de fechas.
+=======
      * dejó ACTIVOS y dentro de su ventana de fechas (mismo método
      * estaDisponible() que ya usa el panel admin para el semáforo).
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
      */
     public function index()
     {
@@ -25,7 +29,11 @@ class UserSolicitudController extends Controller
             ->filter(fn ($t) => $t->estaDisponible())
             ->values();
 
+<<<<<<< HEAD
+        // Solicitudes propias del estudiante logueado
+=======
         // Solicitudes propias del estudiante logueado (para el resumen y la tabla de abajo)
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         $misSolicitudesTodas = Solicitud::with(['tipoSolicitud', 'estadoActual'])
             ->where('sol_usu_id', Auth::id())
             ->get();
@@ -45,8 +53,26 @@ class UserSolicitudController extends Controller
     }
 
     /**
+<<<<<<< HEAD
+     * Listado general de trámites disponibles para el estudiante.
+     * Apunta directamente a la vista resources/views/user/tramites.blade.php
+     */
+    public function listarTramites()
+    {
+        $tramites = TipoSolicitud::with('requisitos')
+            ->get()
+            ->filter(fn ($t) => $t->estaDisponible())
+            ->values();
+
+        return view('user.tramites', compact('tramites'));
+    }
+
+    /**
+     * Calendario del estudiante: citas de validación física asignadas.
+=======
      * Calendario del estudiante: citas de validacion fisica asignadas
      * a sus solicitudes (fecha, lugar y estado de cada una).
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
      */
     public function misCitas()
     {
@@ -59,15 +85,35 @@ class UserSolicitudController extends Controller
     }
 
     /**
+<<<<<<< HEAD
+     * Historial completo de solicitudes del estudiante.
+     */
+    public function historial()
+    {
+        $misSolicitudesRecientes = Solicitud::with(['tipoSolicitud', 'estadoActual'])
+            ->where('sol_usu_id', Auth::id())
+            ->orderByDesc('sol_fecha_creacion')
+            ->get();
+
+        return view('user.historial', compact('misSolicitudesRecientes'));
+    }
+
+    /**
+     * Formulario para solicitar un trámite específico.
+=======
      * Formulario para solicitar un trámite específico.
      * Muestra dinámicamente los requisitos que el admin le asignó a ESE trámite.
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
      */
     public function create($id)
     {
         $tramite = TipoSolicitud::with('requisitos')->findOrFail($id);
 
+<<<<<<< HEAD
+=======
         // Doble candado: si alguien entra por URL directa a un trámite que
         // ya se desactivó o venció, lo mandamos de vuelta con un aviso.
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         if (! $tramite->estaDisponible()) {
             return redirect()->route('dashboard')->with('error', 'Este trámite ya no está disponible.');
         }
@@ -76,8 +122,12 @@ class UserSolicitudController extends Controller
     }
 
     /**
+<<<<<<< HEAD
+     * Guarda la solicitud nueva del estudiante.
+=======
      * Guarda la solicitud nueva del estudiante. Aparece automáticamente
      * en el dashboard admin porque escribe en la misma tabla "solicitudes".
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
      */
     public function store(Request $request, $id)
     {
@@ -91,9 +141,12 @@ class UserSolicitudController extends Controller
             'motivo' => 'required|string|max:2000',
         ]);
 
+<<<<<<< HEAD
+=======
         // Toda solicitud queda "amarrada" a un lapso académico activo
         // (semestre/periodo actual). Si nadie configuró uno, avisamos en
         // vez de guardar una solicitud "huérfana".
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         $lapso = LapsoAcademico::where('lac_estado_lapso', 'activo')->first();
         if (! $lapso) {
             return back()
@@ -117,4 +170,8 @@ class UserSolicitudController extends Controller
 
         return redirect()->route('dashboard')->with('success', '¡Solicitud enviada correctamente! El administrador la revisará pronto.');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1

@@ -224,6 +224,8 @@
     @endif
 
 </div>
+<<<<<<< HEAD
+=======
 
 <div id="modalNuevoTicket" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
     <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -248,4 +250,5 @@
         </form>
     </div>
 </div>
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
 @endsection

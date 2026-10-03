@@ -8,6 +8,38 @@ use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserSolicitudController;
+<<<<<<< HEAD
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+});
+
+Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
+Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.post');
+
+Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
+Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
+
+Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->prefix('user')->group(function () {
+    Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
+    Route::get('/citas', [UserSolicitudController::class, 'misCitas'])->name('user.citas');
+    
+    Route::get('/tramites', [UserSolicitudController::class, 'listarTramites'])->name('user.tramites.index');
+    Route::get('/historial', [UserSolicitudController::class, 'historial'])->name('user.solicitudes.historial');
+
+    Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
+    Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
+    
+    Route::get('/soporte', [PreguntasFrecuentesController::class, 'index'])->name('soporte.index');
+
+=======
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -42,6 +74,7 @@ Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/soporte', [PreguntasFrecuentesController::class, 'index'])->name('soporte.index');
 
     // Módulo Chat Estudiante: URLs bajo /user/soporte/chat/...
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
     Route::prefix('soporte/chat')->name('user.chat.')->group(function () {
         Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
         Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
@@ -52,6 +85,21 @@ Route::middleware('auth')->prefix('user')->group(function () {
     });
 });
 
+<<<<<<< HEAD
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+
+    Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
+
+    Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
+        ->except(['show'])
+        ->names('admin.tipos-solicitud');
+        
+    Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
+        ->name('admin.tipos-solicitud.alternar-estado');
+
+=======
 // ============================================================
 // GRUPO ADMIN
 // Nota: El panel queda SIN autenticación local porque el acceso
@@ -80,11 +128,15 @@ Route::prefix('admin')->group(function () {
         ->name('admin.tipos-solicitud.alternar-estado');
 
     // CRUD completo de Soporte (Admin)
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
     Route::resource('soporte', PreguntasFrecuentesController::class)
         ->except(['show'])
         ->names('admin.soporte');
 
+<<<<<<< HEAD
+=======
     // Módulo Chat Admin: URLs bajo /admin/soporte/chat/...
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
     Route::middleware('auth')->prefix('soporte/chat')->name('admin.chat.')->group(function () {
         Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
         Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
@@ -92,4 +144,8 @@ Route::prefix('admin')->group(function () {
         Route::post('/{id}/reclamar', [SoporteController::class, 'reclamarChat'])->name('reclamar');
         Route::post('/{id}/proponer-cierre', [SoporteController::class, 'proponerCierre'])->name('proponer_cierre');
     });
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
