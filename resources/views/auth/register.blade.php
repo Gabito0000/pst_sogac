@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
   <title>Registro de Cuenta | Solicítalo</title>
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+=======
+  <title>Registro de Cuenta</title>
+  <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
 </head>
 <body>
   <header class="topbar">
@@ -18,6 +23,7 @@
   </header>
   
   <main class="main container">
+<<<<<<< HEAD
     <div class="auth-wrap auth-wrap--wide">
       <div class="auth-card">
         <div class="auth-card__head">
@@ -31,6 +37,19 @@
           @if ($errors->any())
             <div class="alert alert--error" role="alert">
               <strong>Por favor, corrige los errores en el formulario:</strong>
+=======
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="auth-card__head">
+          <h1>Crear Cuenta</h1>
+          <p>Regístrate en el sistema estudiantil</p>
+        </div>
+        <div class="auth-card__body">
+          
+          <!-- Errores de validación -->
+          @if ($errors->any())
+            <div class="alert alert--error">
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
               <ul>
                 @foreach ($errors->all() as $error)
                   <li>{{ $error }}</li>
@@ -39,6 +58,7 @@
             </div>
           @endif
 
+<<<<<<< HEAD
           <form action="{{ route('register.post') }}" method="POST" class="form" novalidate>
             @csrf
             
@@ -166,6 +186,41 @@
 
         <div class="auth-card__foot">
           ¿Ya tienes una cuenta registrada? <a href="{{ route('login') }}">Inicia sesión aquí</a>
+=======
+          <form action="{{ route('register.post') }}" method="post" class="form">
+            @csrf
+            
+            <div class="field">
+              <label for="nombre">Primer Nombre</label>
+              <input type="text" id="nombre" name="nombre" value="{{ old('nombre') }}" required autofocus />
+            </div>
+
+            <div class="field">
+              <label for="apellido">Primer Apellido</label>
+              <input type="text" id="apellido" name="apellido" value="{{ old('apellido') }}" required />
+            </div>
+
+            <div class="field">
+              <label for="documento">Número de Documento</label>
+              <input type="text" id="documento" name="documento" value="{{ old('documento') }}" required />
+            </div>
+
+            <div class="field">
+              <label for="email">Correo Electrónico</label>
+              <input type="email" id="email" name="email" value="{{ old('email') }}" required />
+            </div>
+            
+            <div class="field">
+              <label for="password">Contraseña</label>
+              <input type="password" id="password" name="password" required />
+            </div>
+            
+            <button type="submit" class="btn btn--primary btn--block">Registrarse</button>
+          </form>
+        </div>
+        <div class="auth-card__foot">
+          ¿Ya tienes una cuenta? <a href="{{ route('login') }}">Inicia sesión aquí</a>
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         </div>
       </div>
     </div>
@@ -173,9 +228,17 @@
 
   <footer class="footer">
     <div class="container">
+<<<<<<< HEAD
       <p>&copy; {{ date('Y') }} UPTP "Juan de Jesús Montilla" — Solicítalo</p>
     </div>
   </footer>
 </body>
 </html>
 ```[cite: 1]
+=======
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles</p>
+    </div>
+  </footer>
+</body>
+</html>
+>>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
