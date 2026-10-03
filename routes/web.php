@@ -116,11 +116,3 @@ Route::prefix('admin')->group(function () {
     Route::delete('/{usuario}', [AdminUserController::class, 'destroy'])->name('destroy');
     });
 });
-
-
-Route::get('/test-mail', function () {
-    \Illuminate\Support\Facades\Mail::raw('¡Tu conexión a Mailtrap funciona perfectamente!', function ($message) {
-        $message->to('test@solicitalo.com')->subject('Prueba Directa desde Laravel');
-    });
-    return 'Intento de envío ejecutado. Revisa Mailtrap o la terminal si sale algún error.';
-});
