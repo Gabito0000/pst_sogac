@@ -7,19 +7,41 @@
   
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
+  
+  <style>
+    /* Estilo idéntico al menú de usuario para el botón de salir en la barra de navegación */
+    .nav form button.logout-btn {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      color: inherit;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease, opacity 0.2s ease;
+    }
+    .nav form button.logout-btn:hover {
+      color: var(--red, #ef4444);
+      opacity: 0.85;
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
     <div class="container topbar__inner">
-      <a href="{{ route('admin.dashboard') }}" class="brand">
+      <a href="{{ route('admin.dashboard') }}" class="brand" style="text-decoration:none;">
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo <span style="font-size: 0.8rem; background: var(--red); padding: 2px 8px; border-radius: 4px;">ADMIN</span></span>
       </a>
       
       <nav class="nav">
-        <a href="{{ route('admin.tipos-solicitud.index') }}" class="btn btn--primary btn--sm">Gestionar Trámites</a>
-        <a href="{{ route('admin.requisitos.index') }}" class="btn btn--primary btn--sm">Catálogo de Requisitos</a>
-        <a href="{{ route('admin.chat.index') }}" class="btn btn--primary btn--sm">Bandeja de Soporte</a>
+        <a href="{{ route('admin.dashboard') }}">Inicio</a>
+        <a href="{{ route('admin.tipos-solicitud.index') }}">Trámites</a>
+        <a href="{{ route('admin.requisitos.index') }}">Requisitos</a>
+        <a href="{{ route('admin.chat.index') }}">Soporte</a>
         
         @auth
             <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
@@ -27,15 +49,15 @@
             <span class="nav__user">Modo Invitado</span>
         @endauth
         
-        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+        <form action="{{ route('logout') }}" method="POST" style="margin:0; display:inline;">
           @csrf
-          <button type="submit" class="btn btn--ghost">Salir</button>
+          <button type="submit" class="logout-btn">Salir</button>
         </form>
       </nav>
     </div>
   </header>
   
-  <main>
+  <main class="main container">
       @yield("content")
   </main>
   
