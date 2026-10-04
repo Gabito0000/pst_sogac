@@ -16,8 +16,8 @@ class AdminUsuarioController extends Controller
      * (rol distinto de 'estudiante'): la institucion tendra miles de
      * estudiantes y no tiene sentido listarlos aqui.
      *
-     * Para sumar a alguien nuevo se usa "agregarUsuario", que busca por
-     * correo o cedula y le asigna el rol.
+     * Para sumar a alguien nuevo se usa "agregarUsuario", que busca
+     * unicamente por correo electronico y le asigna el rol.
      *
      * Solo accesible por el rol administrador (middleware 'rol:administrador').
      */
@@ -32,25 +32,31 @@ class AdminUsuarioController extends Controller
 
     /**
      * Agrega a una persona al personal administrativo.
-     * Se busca por correo electronico o por cedula.
+     *
+     * Solo se admite el CORREO ELECTRONICO: es un dato unico e
+     * verificado por cada persona (la cedula puede estar mal escrita).
      */
     public function agregarUsuario(Request $request)
     {
-        $datos = $request->validate([
-            'busqueda' => ['required', 'string', 'max:100'],
-            'rol' => ['required', 'string', 'in:'.implode(',', Rol::administrativos())],
-        ]);
+        $datos = $request->validate(
+            [
+                'email' => ['required', 'string', 'email', 'max:100'],
+                'rol' => ['required', 'string', 'in:'.implode(',', Rol::administrativos())],
+            ],
+            [
+                'email.required' => 'Escribe el correo electrónico de la persona.',
+                'email.email' => 'El correo electrónico no tiene un formato válido.',
+            ]
+        );
 
-        $termino = trim($datos['busqueda']);
+        $email = trim($datos['email']);
 
-        $usuario = Usuario::where('usu_correo_electronico', $termino)
-            ->orWhere('usu_numero_documento', $termino)
-            ->first();
+        $usuario = Usuario::where('usu_correo_electronico', $email)->first();
 
         if (! $usuario) {
             return back()->with(
                 'error',
-                "No se encontró ningún usuario con el correo o cédula «{$termino}». Verifica que esté registrado."
+                "No se encontró ningún usuario registrado con el correo «{$email}». Verifica que esté bien escrito."
             );
         }
 

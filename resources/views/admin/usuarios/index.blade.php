@@ -21,17 +21,17 @@
 {{-- ============================================================ --}}
 <div class="card">
     <h2 class="card__title">Agregar a un usuario</h2>
-    <p class="card__sub">Busca a la persona por su correo electrónico o cédula y asígnale un rol.</p>
+    <p class="card__sub">Escribe el correo electrónico de la persona y asígnale un rol.</p>
 
     <form method="POST" action="{{ route('admin.usuarios.agregar') }}"
           style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
         @csrf
 
         <div class="field" style="flex: 2; min-width: 260px;">
-            <label for="busqueda">Correo electrónico o cédula</label>
-            <input type="text" id="busqueda" name="busqueda" required
-                   value="{{ old('busqueda') }}"
-                   placeholder="ejemplo: gabriel@uptp.edu.ve o V-30123456" />
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required
+                   value="{{ old('email') }}"
+                   placeholder="ejemplo: gabriel@uptp.edu.ve" />
         </div>
 
         <div class="field" style="flex: 1; min-width: 190px;">
@@ -49,8 +49,8 @@
     </form>
 
     <p style="color: var(--gray-700); font-size: 0.85rem; margin-top: 14px;">
-        El usuario debe estar registrado en el sistema (puede haberse registrado como estudiante).
-        Al agregarlo cambia su rol y accede al panel administrativo.
+        Solo se busca por correo electrónico. La persona debe estar registrada en el sistema
+        (puede haberse registrado como estudiante): al agregarla cambia de rol y accede al panel administrativo.
     </p>
 </div>
 
