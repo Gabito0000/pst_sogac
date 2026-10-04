@@ -71,6 +71,6 @@
   {{-- Paginación: la clase 'pagina-link' es la que el JS "escucha" para
        interceptar el clic y traer la página siguiente sin recargar --}}
   <div style="margin-top: 20px;">
-    {{ $solicitudes->links('vendor.pagination.custom') }}
+    {{ $solicitudes->links('vendor.pagination.custom', ['etiqueta' => 'solicitudes']) }}
   </div>
 @endif

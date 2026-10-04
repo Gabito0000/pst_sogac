@@ -24,5 +24,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(SolicitudesDePruebaSeeder::class);
         $this->call(SolicitudesPanelEstadisticasSeeder::class);
+        $this->call(PreguntasFrecuentesDemoSeeder::class);
     }
 }

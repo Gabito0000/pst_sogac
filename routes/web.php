@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminEstadisticasController;
+use App\Http\Controllers\AdminPreguntaFrecuenteController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
+use App\Http\Controllers\AyudaController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserSolicitudController;
@@ -38,15 +39,20 @@ Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
 
-    Route::get('/soporte', [PreguntasFrecuentesController::class, 'index'])->name('soporte.index');
+    // Ayuda: las preguntas frecuentes y el chat son dos sectores distintos.
+    // Antes ambos vivian bajo "soporte", lo que hacia que /user/soporte
+    // mostrara las FAQ y el chat quedara escondido debajo del mismo nombre.
+    Route::prefix('ayuda')->name('user.ayuda.')->group(function () {
+        Route::get('/preguntas', [AyudaController::class, 'preguntas'])->name('preguntas');
 
-    Route::prefix('soporte/chat')->name('user.chat.')->group(function () {
-        Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
-        Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
-        Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
-        Route::post('/iniciar', [SoporteController::class, 'iniciarChat'])->name('iniciar');
-        Route::post('/{id}/confirmar', [SoporteController::class, 'confirmarCierre'])->name('confirmar');
-        Route::post('/{id}/rechazar', [SoporteController::class, 'desconfirmarCierre'])->name('rechazar');
+        Route::prefix('chat')->name('chat.')->group(function () {
+            Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
+            Route::post('/iniciar', [SoporteController::class, 'iniciarChat'])->name('iniciar');
+            Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
+            Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
+            Route::post('/{id}/confirmar', [SoporteController::class, 'confirmarCierre'])->name('confirmar');
+            Route::post('/{id}/rechazar', [SoporteController::class, 'desconfirmarCierre'])->name('rechazar');
+        });
     });
 });
 
@@ -68,15 +74,24 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
         ->name('admin.tipos-solicitud.alternar-estado');
 
-    Route::resource('soporte', PreguntasFrecuentesController::class)
+    // Preguntas frecuentes: CRUD propio del administrador. Antes compartia una
+    // vista con el estudiante que se bifurcaba por rol, y create()/edit()
+    // apuntaban a vistas que no existen.
+    // Sin 'show': la pregunta se lee dentro del listado o del portal del
+    // estudiante, no en una pagina propia.
+    Route::resource('preguntas', AdminPreguntaFrecuenteController::class)
         ->except(['show'])
-        ->names('admin.soporte');
+        ->names('admin.preguntas');
 
-    Route::middleware('auth')->prefix('soporte/chat')->name('admin.chat.')->group(function () {
+    // Chats de soporte. El middleware 'admin' ya exige sesion, asi que no hace
+    // falta volver a anadir 'auth' aqui.
+    Route::prefix('chat')->name('admin.chat.')->group(function () {
         Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
         Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
         Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
         Route::post('/{id}/reclamar', [SoporteController::class, 'reclamarChat'])->name('reclamar');
-        Route::post('/{id}/proponer-cierre', [SoporteController::class, 'proponerCierre'])->name('proponer_cierre');
+        // Con guion, igual que admin.tipos-solicitud.alternar-estado: era el
+        // único nombre de ruta con guion bajo y se colaba con la referencia.
+        Route::post('/{id}/proponer-cierre', [SoporteController::class, 'proponerCierre'])->name('proponer-cierre');
     });
 });
