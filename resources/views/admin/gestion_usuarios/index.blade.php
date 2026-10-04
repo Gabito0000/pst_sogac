@@ -214,7 +214,7 @@
             <div><span class="font-bold">Correo:</span> ${user.usu_correo_electronico}</div>
             <div><span class="font-bold">Teléfono:</span> ${user.usu_numero_telefono || 'N/A'}</div>
             <div><span class="font-bold">Rol:</span> <span class="uppercase">${user.usu_rol}</span></div>
-            <div><span class="font-bold">Creado el:</span> ${user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A'}</div>
+            <div><span class="font-bold">Creado el:</span> ${user.usu_fecha_registro ? new Date(user.usu_fecha_registro).toLocaleString() : 'N/A'}</div>
             <div class="col-span-2"><span class="font-bold">Último Acceso:</span> ${user.usu_ultimo_acceso ? new Date(user.usu_ultimo_acceso).toLocaleString() : 'Nunca'}</div>
         `;
         overlay.classList.remove('hidden');

@@ -45,6 +45,33 @@ class UserSolicitudController extends Controller
     }
 
     /**
+     * Listado general de trámites disponibles para el estudiante.
+     * Apunta directamente a la vista resources/views/user/tramites.blade.php
+     */
+    public function listarTramites()
+    {
+        $tramites = TipoSolicitud::with('requisitos')
+            ->get()
+            ->filter(fn ($t) => $t->estaDisponible())
+            ->values();
+
+        return view('user.tramites', compact('tramites'));
+    }
+
+    /**
+     * Historial completo de solicitudes del estudiante.
+     */
+    public function historial()
+    {
+        $misSolicitudesRecientes = Solicitud::with(['tipoSolicitud', 'estadoActual'])
+            ->where('sol_usu_id', Auth::id())
+            ->orderByDesc('sol_fecha_creacion')
+            ->get();
+
+        return view('user.historial', compact('misSolicitudesRecientes'));
+    }
+
+    /**
      * Calendario del estudiante: citas de validacion fisica asignadas
      * a sus solicitudes (fecha, lugar y estado de cada una).
      */
