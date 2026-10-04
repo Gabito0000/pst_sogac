@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solicítalo — Gestión de Solicitudes</title>
   
-<<<<<<< HEAD
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
   
@@ -29,9 +28,6 @@
       opacity: 0.85;
     }
   </style>
-=======
-  <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
 </head>
 <body>
   <header class="topbar">
@@ -40,16 +36,12 @@
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo</span>
       </a>
-<<<<<<< HEAD
       
-=======
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
       <nav class="nav">
         <a href="{{ route('dashboard') }}">Inicio</a>
         <a href="{{ route('dashboard') }}#mis-solicitudes">Mis Solicitudes</a>
         <a href="{{ route('user.citas') }}">Calendario</a>
         <a href="{{ route('user.chat.index') }}">Ayuda</a>
-<<<<<<< HEAD
         <a href="{{ route('user.tramites.index') }}">+ Trámite</a>
         <a href="{{ route('user.solicitudes.historial') }}">Historial</a>
 
@@ -58,12 +50,6 @@
         <form action="{{ route('logout') }}" method="POST" style="margin:0; display:inline;">
           @csrf
           <button type="submit" class="logout-btn">Salir</button>
-=======
-        <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
-        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-          @csrf
-          <button type="submit" class="btn btn--ghost btn--sm">Salir</button>
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         </form>
       </nav>
     </div>

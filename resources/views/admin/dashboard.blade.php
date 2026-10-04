@@ -4,15 +4,9 @@
 
 @section('content')
 <div class="container main">
-<<<<<<< HEAD
     <section class="hero" style="background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 6px solid var(--red); padding: 24px; border-radius: var(--radius); color: white; margin-bottom: 24px;">
       <h1 style="font-size: 1.6rem; margin-bottom: 6px;">Panel de Control Administrativo</h1>
       <p style="color: var(--gray-400); margin: 0;">Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
-=======
-    <section class="hero" style="background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 6px solid var(--red);">
-      <h1>Panel de Control Administrativo</h1>
-      <p>Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
     </section>
 
     {{-- Manejo de mensajes de éxito enviados desde el Controlador --}}
@@ -20,7 +14,6 @@
         <div class="alert alert--success">{{ session('success') }}</div>
     @endif
 
-<<<<<<< HEAD
     <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
       <a href="{{ route('admin.dashboard') }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--black); {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
         <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Total Solicitudes</div>
@@ -44,31 +37,6 @@
       <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;">Listado de Solicitudes Estudiantiles</h2>
       <p style="color: var(--gray-700); font-size: 0.95rem; margin-bottom: 20px;">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
 
-=======
-    <div class="stats">
-      {{-- Cada tarjeta es un link que filtra directamente por ese estado. El "Total" limpia el filtro de estado. --}}
-      <a href="{{ route('admin.dashboard') }}" class="stat" style="text-decoration:none; color:inherit; {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
-        <div class="stat__label">Total Solicitudes</div><div class="stat__value">{{ $stats['total'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'pendiente']) }}" class="stat" style="text-decoration:none; color:inherit; border-left-color: #ffd6d6; {{ request('estado') === 'pendiente' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div class="stat__label">Pendientes</div><div class="stat__value">{{ $stats['pendiente'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'aprobada']) }}" class="stat" style="text-decoration:none; color:inherit; border-left-color: #d6f5e3; {{ request('estado') === 'aprobada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div class="stat__label">Aprobadas</div><div class="stat__value">{{ $stats['aprobada'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'rechazada']) }}" class="stat" style="text-decoration:none; color:inherit; border-left-color: var(--red); {{ request('estado') === 'rechazada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div class="stat__label">Rechazadas</div><div class="stat__value">{{ $stats['rechazada'] }}</div>
-      </a>
-    </div>
-
-    <div class="card">
-      <h2 class="card__title">Listado de Solicitudes Estudiantiles</h2>
-      <p class="card__sub">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
-
-      {{-- Estilos propios de esta barra: tabs tipo píldora y badges con punto de color,
-           inspirados en paneles tipo Stripe/Vercel. Se quedan aquí (no en style_admin.css)
-           para no afectar otras páginas del proyecto. --}}
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
       <style>
         .buscador-caja { position: relative; flex: 1; min-width: 240px; }
         .buscador-caja input {
@@ -98,21 +66,11 @@
         .badge-punto--rechazada { background: #fdd6d6; color: var(--red-dark); }
         .badge-punto--rechazada .badge-punto__dot { background: var(--red); }
 
-<<<<<<< HEAD
         #tipo_solicitud {
           padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--gray-200); font-size: 0.95rem; background-color: white;
         }
         #tipo_solicitud:focus { border-color: var(--red); outline: none; }
 
-=======
-        /* Mismo look que el buscador, para el select "Todos los trámites" */
-        #tipo_solicitud {
-          padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--gray-200); font-size: 0.95rem;
-        }
-        #tipo_solicitud:focus { border-color: var(--red); outline: none; }
-
-        /* Modal de detalle con barra de color arriba según el estado */
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
         .modal-overlay {
           position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
           display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -136,13 +94,6 @@
         .modal-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 10px; }
       </style>
 
-<<<<<<< HEAD
-=======
-      {{-- Barra de búsqueda. Ya NO se envía como formulario tradicional:
-           el JS de más abajo intercepta cada acción (escribir, cambiar el select,
-           hacer clic en una pestaña o en la paginación) y pide los datos con fetch(),
-           sin recargar la página. --}}
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
       <form method="GET" action="{{ route('admin.dashboard') }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
         <div class="buscador-caja">
           <i class="ti ti-search" aria-hidden="true"></i>
@@ -179,12 +130,7 @@
         </div>
       </form>
 
-<<<<<<< HEAD
       {{-- Modal de detalle --}}
-=======
-      {{-- Modal de detalle. Vive FUERA de #resultados-wrapper para que no se borre
-           cada vez que se reemplaza la tabla al buscar/filtrar. --}}
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
       <div id="modal-detalle" class="modal-overlay" style="display:none;">
         <div class="modal-caja">
           <div id="modal-barra" class="modal-barra"></div>
@@ -209,10 +155,6 @@
         </div>
       </div>
 
-<<<<<<< HEAD
-=======
-      {{-- Este div es lo único que se reemplaza cuando se busca/filtra/pagina --}}
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
       <div id="resultados-wrapper">
         @include('admin.partials.resultados')
       </div>
@@ -225,26 +167,14 @@
           const tabs = document.querySelectorAll('.tab-estado');
           const urlBase = "{{ route('admin.dashboard') }}";
 
-<<<<<<< HEAD
           let estadoActual = new URLSearchParams(window.location.search).get('estado') || '';
 
-=======
-          // Estado actual de los filtros (arranca con lo que ya viene en la URL)
-          let estadoActual = new URLSearchParams(window.location.search).get('estado') || '';
-
-          // Pide al servidor solo el pedazo de la tabla (fetch = "pedido en segundo plano",
-          // no navega a otra página, por eso no hay recarga ni parpadeo).
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           function buscar(url) {
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
               .then(function (respuesta) { return respuesta.text(); })
               .then(function (html) {
                 wrapper.innerHTML = html;
-<<<<<<< HEAD
                 history.pushState(null, '', url);
-=======
-                history.pushState(null, '', url); // Actualiza la URL sin recargar (para poder compartir el link o recargar F5 y mantener el filtro)
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
               });
           }
 
@@ -257,10 +187,6 @@
             buscar(urlBase + (query ? '?' + query : ''));
           }
 
-<<<<<<< HEAD
-=======
-          // Búsqueda en vivo: espera 400ms después de que el usuario deja de escribir
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           let temporizador;
           inputBusqueda.addEventListener('input', function () {
             clearTimeout(temporizador);
@@ -279,12 +205,6 @@
             });
           });
 
-<<<<<<< HEAD
-=======
-          // Los links de paginación se recrean cada vez que se reemplaza el HTML,
-          // así que "escuchamos" los clics en el contenedor padre (delegación de eventos)
-          // en vez de engancharlos uno por uno.
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           wrapper.addEventListener('click', function (e) {
             const link = e.target.closest('a.pagina-link');
             if (link) {
@@ -301,10 +221,6 @@
             }
           });
 
-<<<<<<< HEAD
-=======
-          // --- Modal de detalle, con Anterior/Siguiente entre las solicitudes de la página actual ---
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           const modal = document.getElementById('modal-detalle');
           const modalBarra = document.getElementById('modal-barra');
           const modalTitulo = document.getElementById('modal-titulo');
@@ -343,11 +259,7 @@
             if (data.estado === 'pendiente') {
               modalAcciones.innerHTML =
                 '<button type="button" id="modal-btn-aprobar" class="btn" style="background:#22a35a; color:white; flex:1;">Aprobar</button>' +
-<<<<<<< HEAD
                 '<button type="button" id="modal-btn-rechazar" class="btn" style="background:var(--red); color:white; flex:1;">Rechazar</button>';
-=======
-                '<button type="button" id="modal-btn-rechazar" class="btn btn--danger" style="flex:1;">Rechazar</button>';
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
 
               document.getElementById('modal-btn-aprobar').addEventListener('click', function () {
                 resolverDesdeModal(data.aprobarUrl, 'aprobada');
@@ -371,12 +283,6 @@
             modal.style.display = 'none';
           }
 
-<<<<<<< HEAD
-=======
-          // Aprueba/rechaza SIN recargar la página ni cerrar el modal.
-          // Actualiza el estado en el botón de la fila (fuente de la verdad)
-          // y vuelve a pintar el modal con el color/estado nuevo.
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           function resolverDesdeModal(url, nuevoEstado) {
             const botonesAccion = modalAcciones.querySelectorAll('button');
             botonesAccion.forEach(function (b) { b.disabled = true; b.style.opacity = '0.6'; });
@@ -384,16 +290,8 @@
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
               .then(function (respuesta) { return respuesta.json(); })
               .then(function () {
-<<<<<<< HEAD
                 listaActual[indiceActual].dataset.estado = nuevoEstado;
                 pintarModal();
-=======
-                // Actualiza el data-estado del botón "Detalle" de esa fila en la tabla de fondo
-                listaActual[indiceActual].dataset.estado = nuevoEstado;
-                // Repinta el modal: cambia la barra de color y quita Aprobar/Rechazar
-                pintarModal();
-                // Actualiza también la fila visualmente (badge + columna de acciones)
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
                 actualizarFilaEnTabla(listaActual[indiceActual]);
               })
               .catch(function () {
@@ -402,11 +300,6 @@
               });
           }
 
-<<<<<<< HEAD
-=======
-          // Actualiza el badge de estado y la columna de Acciones de la fila en la tabla,
-          // sin volver a pedirle nada al servidor (ya sabemos el resultado).
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
           function actualizarFilaEnTabla(botonDetalle) {
             const fila = botonDetalle.closest('tr');
             if (!fila) return;
@@ -419,18 +312,10 @@
               badge.innerHTML = '<span class="badge-punto__dot"></span>' + etiqueta;
             }
 
-<<<<<<< HEAD
             const celdaAcciones = fila.querySelector('td:last-child');
             if (celdaAcciones) {
               const aprobar = celdaAcciones.querySelector('a[style*="22a35a"]');
               const rechazar = celdaAcciones.querySelector('a[style*="var(--red)"]');
-=======
-            // Como ya no está pendiente, quitamos los botones Aprobar/Rechazar de la fila
-            const celdaAcciones = fila.querySelector('td:last-child');
-            if (celdaAcciones) {
-              const aprobar = celdaAcciones.querySelector('a[style*="22a35a"]');
-              const rechazar = celdaAcciones.querySelector('a.btn--danger');
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
               if (aprobar) aprobar.remove();
               if (rechazar) rechazar.remove();
             }

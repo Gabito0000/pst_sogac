@@ -224,15 +224,15 @@
     @endif
 
 </div>
-<<<<<<< HEAD
-=======
-
+<!-- Modal Nuevo Ticket -->
+<!-- El boton "+ Crear Nuevo Ticket" llama a este modal por JS (modalNuevoTicket).
+     Venia del commit del autor del PR pero se perdio al resolver los conflictos,
+     por eso el boton no hacia nada. Se reintegra aqui. -->
 <div id="modalNuevoTicket" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
     <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
         <h3 style="margin-top: 0; color: var(--black);">Nuevo Ticket de Soporte</h3>
         <p style="color: var(--gray-700); font-size: 0.9rem; margin-bottom: 20px;">Describe tu problema con detalle para abrir el chat con un administrador.</p>
-        
-        <!-- Apunta a la misma ruta de iniciar chat, pero con el formulario enriquecido -->
+
         <form action="{{ route('user.chat.iniciar') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
             @csrf
             <div>
@@ -250,5 +250,4 @@
         </form>
     </div>
 </div>
->>>>>>> 7d0685b4379ba4764a11a7f976b77bb0be3b5bb1
 @endsection
