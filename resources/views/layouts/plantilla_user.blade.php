@@ -44,7 +44,7 @@
         <div class="nav__group">
           <a href="{{ route('dashboard') }}" @if (request()->routeIs('dashboard')) aria-current="page" @endif>Inicio</a>
           <a href="{{ route('user.tramites.index') }}" @if (request()->routeIs('user.tramites.*')) aria-current="page" @endif>Trámites</a>
-          <a href="{{ route('user.solicitudes.historial') }}" @if (request()->routeIs('user.solicitudes.*')) aria-current="page" @endif>Mis solicitudes</a>
+          <a href="{{ route('user.historial.index') }}" @if (request()->routeIs('user.historial.*')) aria-current="page" @endif>Mis solicitudes</a>
           <a href="{{ route('user.citas') }}" @if (request()->routeIs('user.citas*')) aria-current="page" @endif>Calendario</a>
         </div>
 

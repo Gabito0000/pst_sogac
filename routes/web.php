@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminEstadisticasController;
+use App\Http\Controllers\AdminHistorialCambioController;
 use App\Http\Controllers\AdminPreguntaFrecuenteController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\AyudaController;
+use App\Http\Controllers\HistorialSolicitudController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
@@ -34,7 +36,14 @@ Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/citas', [UserSolicitudController::class, 'misCitas'])->name('user.citas');
 
     Route::get('/tramites', [UserSolicitudController::class, 'listarTramites'])->name('user.tramites.index');
-    Route::get('/historial', [UserSolicitudController::class, 'historial'])->name('user.solicitudes.historial');
+
+    // Historial de solicitudes del estudiante. Antes era una sola pagina plana
+    // (user.solicitudes.historial, en /user/historial) con cuatro columnas; ahora
+    // es un sector con listado filtrable y ficha de detalle.
+    Route::prefix('historial')->name('user.historial.')->group(function () {
+        Route::get('/', [HistorialSolicitudController::class, 'index'])->name('index');
+        Route::get('/{solicitud}', [HistorialSolicitudController::class, 'show'])->name('show');
+    });
 
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
@@ -64,6 +73,15 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // Panel estadístico: métricas precisas de todo el proceso de las solicitudes.
     Route::get('/estadisticas', [AdminEstadisticasController::class, 'index'])->name('admin.estadisticas');
     Route::get('/estadisticas/exportar', [AdminEstadisticasController::class, 'exportar'])->name('admin.estadisticas.exportar');
+
+    // Bitácora de cambios: qué se tocó en el sistema, quién y con qué valores.
+    // Es un sector aparte y no una pestaña del panel estadístico porque mide
+    // cosas distintas: el panel resume los números del proceso de solicitudes y
+    // la bitácora deja constancia de cada modificación, con su autor.
+    Route::prefix('cambios')->name('admin.cambios.')->group(function () {
+        Route::get('/', [AdminHistorialCambioController::class, 'index'])->name('index');
+        Route::get('/exportar', [AdminHistorialCambioController::class, 'exportar'])->name('exportar');
+    });
 
     Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
 
