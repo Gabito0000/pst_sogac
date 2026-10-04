@@ -6,12 +6,23 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-createInertiaApp({
-    // Aquí le decimos que busque los archivos .vue dentro de la carpeta resources/js/pages/
-    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue')),
-    setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .mount(el);
-    },
-});
+/*
+ * La aplicación se renderiza con Blade: ninguna vista monta el div #app que
+ * necesita Inertia. Aun así createInertiaApp() se ejecutaba en todas las
+ * pantallas y fallaba con "Cannot read properties of null (reading
+ * 'component')", dejando un error en la consola en cada página.
+ *
+ * El guardia mantiene el arranque intacto para el día que exista una respuesta
+ * de Inertia de verdad, y hoy solo evita el error.
+ */
+if (document.getElementById('app')?.dataset.inertia !== undefined) {
+    createInertiaApp({
+        // Aquí le decimos que busque los archivos .vue dentro de la carpeta resources/js/pages/
+        resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue')),
+        setup({ el, App, props, plugin }) {
+            createApp({ render: () => h(App, props) })
+                .use(plugin)
+                .mount(el);
+        },
+    });
+}

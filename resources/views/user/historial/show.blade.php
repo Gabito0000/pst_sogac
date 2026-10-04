@@ -1,0 +1,184 @@
+@extends('layouts.plantilla_user')
+
+@section('title', 'Solicitud '.$solicitud->sol_id_seguimiento)
+
+@section('content')
+    @php
+        use Illuminate\Support\Carbon;
+
+        $estado = strtolower($solicitud->estadoActual->eso_nombre_estado);
+    @endphp
+
+    @include('partials.avisos')
+
+    @include('partials.miga', [
+        'miga' => [
+            ['texto' => 'Inicio', 'ruta' => route('dashboard')],
+            ['texto' => 'Mis solicitudes', 'ruta' => route('user.historial.index')],
+            ['texto' => $solicitud->sol_id_seguimiento],
+        ],
+    ])
+
+    @unless ($esPropia)
+        <div class="alert alert--info">
+            Estás viendo la solicitud de <strong>{{ $solicitud->usuario?->nombre_completo ?? 'un estudiante' }}</strong>
+            en modo administrador: puedes consultarla, pero no modificarla desde aquí.
+        </div>
+    @endunless
+
+    <div class="pagina-head">
+        <div>
+            <h1 class="pagina-head__titulo">{{ $solicitud->tipoSolicitud->tsi_nombre_tipo }}</h1>
+            <p class="pagina-head__desc">
+                Solicitud <strong>{{ $solicitud->sol_id_seguimiento }}</strong> enviada el
+                {{ $solicitud->sol_fecha_creacion->format('d/m/Y') }} a las
+                {{ $solicitud->sol_fecha_creacion->format('H:i') }}.
+            </p>
+        </div>
+
+        <div class="pagina-head__acciones">
+            <span class="badge badge--{{ $estado }}" style="font-size: 0.9rem; padding: 8px 16px;">
+                {{ ucfirst($estado) }}
+            </span>
+            <a href="{{ route('user.historial.index') }}" class="btn btn--ghost">Volver al historial</a>
+        </div>
+    </div>
+
+    <div class="panel-grid">
+        {{-- Datos de la solicitud --}}
+        <section class="panel">
+            <h2 class="panel__title">Datos de la solicitud</h2>
+
+            <dl class="datos">
+                <div class="datos__fila">
+                    <dt>Código de seguimiento</dt>
+                    <dd style="font-family: ui-monospace, monospace;">{{ $solicitud->sol_id_seguimiento }}</dd>
+                </div>
+
+                <div class="datos__fila">
+                    <dt>Trámite</dt>
+                    <dd>{{ $solicitud->tipoSolicitud->tsi_nombre_tipo }}</dd>
+                </div>
+
+                <div class="datos__fila">
+                    <dt>Periodo académico</dt>
+                    <dd>{{ $solicitud->lapsoAcademico?->lac_id_lapso ?? '—' }}</dd>
+                </div>
+
+                <div class="datos__fila">
+                    <dt>Prioridad</dt>
+                    <dd>{{ $solicitud->sol_prioridad ?? 'sin prioridad asignada' }}</dd>
+                </div>
+
+                <div class="datos__fila">
+                    <dt>Enviada</dt>
+                    <dd>{{ $solicitud->sol_fecha_creacion->format('d/m/Y H:i') }}</dd>
+                </div>
+
+                @if ($solicitud->sol_fecha_resolucion)
+                    <div class="datos__fila">
+                        <dt>Resuelta</dt>
+                        <dd>{{ $solicitud->sol_fecha_resolucion->format('d/m/Y H:i') }}</dd>
+                    </div>
+                @endif
+            </dl>
+
+            <div class="panel__hint" style="margin-top: 18px;">
+                <p class="panel__hint-titulo">Motivo que enviaste</p>
+                <p class="panel__hint-texto">{{ $solicitud->sol_motivo_detallado ?? 'No escribiste un motivo.' }}</p>
+            </div>
+        </section>
+
+        {{-- Adjuntos y cita de validación física --}}
+        <section class="panel">
+            <h2 class="panel__title">Adjuntos y cita</h2>
+
+            @if ($solicitud->documentaciones->isEmpty())
+                <p class="estado-vacio" style="padding: 12px 0; text-align: left;">
+                    No hay documentos adjuntos a esta solicitud.
+                </p>
+            @else
+                <ul class="lista-simple">
+                    @foreach ($solicitud->documentaciones as $documento)
+                        <li>
+                            <span class="lista-simple__titulo">{{ $documento->doc_nombre_original_archivo }}</span>
+                            <span class="lista-simple__detalle">
+                                {{ strtoupper((string) $documento->doc_formato_archivo) }}
+                                &middot; {{ $documento->doc_estado_validacion }}
+                                @if ($documento->doc_fecha_subida)
+                                    &middot; {{ Carbon::parse($documento->doc_fecha_subida)->format('d/m/Y') }}
+                                @endif
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            <div class="panel__hint" style="margin-top: 18px;">
+                <p class="panel__hint-titulo">Cita de validación física</p>
+
+                @if ($solicitud->cita)
+                    <p class="panel__hint-texto">
+                        {{ $solicitud->cita->cit_fecha_hora->format('d/m/Y \a \l\a\s H:i') }}
+                        @if ($solicitud->cita->cit_lugar)
+                            &middot; {{ $solicitud->cita->cit_lugar }}
+                        @endif
+                        &middot;
+                        <span class="chip {{ $solicitud->cita->cit_estado === 'agendada' ? 'chip--neutro' : 'chip--ok' }}">
+                            {{ ucfirst((string) $solicitud->cita->cit_estado) }}
+                        </span>
+                    </p>
+                @else
+                    <p class="panel__hint-texto">
+                        Esta solicitud no tiene cita asignada.
+                        @if ($solicitud->tipoSolicitud->tsi_nombre_tipo)
+                            Los trámites que requieren validación en persona se agendan desde la oficina de admisiones.
+                        @endif
+                    </p>
+                @endif
+            </div>
+        </section>
+    </div>
+
+    {{-- Recorrido por los estados --}}
+    <section class="panel" style="margin-bottom: 24px;">
+        <h2 class="panel__title">Recorrido de la solicitud</h2>
+        <p class="panel__hint-texto" style="margin-bottom: 20px;">
+            Cada cambio de estado queda anotado con la fecha, la persona responsable y el comentario que dejó.
+        </p>
+
+        @include('partials.solicitud.timeline', ['solicitud' => $solicitud, 'historial' => $historial])
+    </section>
+
+    {{-- Bitácora de cambios de esta solicitud --}}
+    <section class="panel">
+        <h2 class="panel__title">Cambios registrados</h2>
+        <p class="panel__hint-texto" style="margin-bottom: 20px;">
+            Cada modificación que se ha hecho sobre esta solicitud, con el valor que tenía antes y el que tiene
+            ahora. La bitácora la escribe el sistema sola: no se puede editar ni borrar.
+        </p>
+
+        @if ($cambios->isEmpty())
+            <p class="estado-vacio">
+                Todavía no hay cambios registrados sobre esta solicitud.
+            </p>
+        @else
+            <div class="cambios">
+                @foreach ($cambios as $cambio)
+                    <article class="cambio">
+                        <header class="cambio__cabecera">
+                            <span class="chip {{ $cambio->accion_chip }}">{{ $cambio->accion_etiqueta }}</span>
+                            <strong>{{ $cambio->hcm_resumen }}</strong>
+                            <span class="cambio__meta">
+                                {{ $cambio->hcm_fecha->format('d/m/Y H:i') }}
+                                &middot; {{ $cambio->autor_nombre }}
+                            </span>
+                        </header>
+
+                        @include('partials.cambios.diff', ['cambios' => $cambio->diferencias])
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </section>
+@endsection

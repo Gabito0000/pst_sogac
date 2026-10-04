@@ -30,6 +30,8 @@
   </style>
 </head>
 <body>
+  @include('partials.cabecera')
+
   <header class="topbar">
     <div class="container topbar__inner">
       <a href="{{ route('admin.dashboard') }}" class="brand" style="text-decoration:none;">
@@ -38,11 +40,41 @@
       </a>
       
       <nav class="nav">
-        <a href="{{ route('admin.dashboard') }}">Inicio</a>
-        <a href="{{ route('admin.tipos-solicitud.index') }}">Trámites</a>
-        <a href="{{ route('admin.requisitos.index') }}">Requisitos</a>
-        <a href="{{ route('admin.chat.index') }}">Soporte</a>
-        
+        {{-- Sector 1: configuracion del catalogo academico. --}}
+        <div class="nav__group">
+          <a href="{{ route('admin.dashboard') }}" @if (request()->routeIs('admin.dashboard')) aria-current="page" @endif>Inicio</a>
+          <a href="{{ route('admin.tipos-solicitud.index') }}" @if (request()->routeIs('admin.tipos-solicitud*')) aria-current="page" @endif>Trámites</a>
+          <a href="{{ route('admin.requisitos.index') }}" @if (request()->routeIs('admin.requisitos*')) aria-current="page" @endif>Requisitos</a>
+        </div>
+
+        <span class="nav__sep" aria-hidden="true"></span>
+
+        {{-- Sector 2: medicion del proceso y trazabilidad.
+             "Estadísticas" responde cuánto va el proceso de solicitudes y
+             "Historial de cambios" responde quién tocó qué y con qué valores:
+             son dos preguntas distintas y por eso dos entradas. --}}
+        <div class="nav__group">
+          <a href="{{ route('admin.estadisticas') }}" @if (request()->routeIs('admin.estadisticas*')) aria-current="page" @endif>Estadísticas</a>
+          <a href="{{ route('admin.cambios.index') }}" @if (request()->routeIs('admin.cambios.*')) aria-current="page" @endif>Historial de cambios</a>
+        </div>
+
+        <span class="nav__sep" aria-hidden="true"></span>
+
+        {{-- Sector 3: atencion al estudiante. Antes este sector era un unico
+             enlace "Soporte" que abria el chat, y la gestion de las preguntas
+             frecuentes no era alcanzable desde la interfaz. --}}
+        <div class="nav__group">
+          <a href="{{ route('admin.preguntas.index') }}" @if (request()->routeIs('admin.preguntas*')) aria-current="page" @endif>Preguntas frecuentes</a>
+          <a href="{{ route('admin.chat.index') }}" @if (request()->routeIs('admin.chat*')) aria-current="page" @endif>Chats</a>
+        </div>
+
+        <span class="nav__sep" aria-hidden="true"></span>
+
+        {{-- Vuelta al homepage, que es la pagina principal del sitio. --}}
+        <a href="{{ route('portada') }}" class="nav__sitio">
+          <i class="bi bi-house-door"></i> Ir al sitio
+        </a>
+
         @auth
             <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
         @else
@@ -63,8 +95,11 @@
   
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ now()->year }} Solicítalo — Administrador</p>
+      <p>&copy; {{ now()->year }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
     </div>
   </footer>
+
+  @stack('scripts')
+  @include('partials.modal')
 </body>
 </html>

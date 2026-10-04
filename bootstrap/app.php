@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EsAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Alias para restringir rutas al rol 'admin'. Se usa como ->middleware('admin')
+        // y de paso exige que el usuario esté autenticado.
+        $middleware->alias([
+            'admin' => EsAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

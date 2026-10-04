@@ -23,5 +23,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(SolicitudesDePruebaSeeder::class);
+        $this->call(SolicitudesPanelEstadisticasSeeder::class);
+        $this->call(PreguntasFrecuentesDemoSeeder::class);
+
+        // Va al final porque reconstruye la bitacora a partir de lo que dejaron
+        // los seeders anteriores: necesita solicitudes con historial y catálogo
+        // ya cargados.
+        $this->call(HistorialCambiosDemoSeeder::class);
     }
 }

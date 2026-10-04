@@ -71,19 +71,6 @@ class UserSolicitudController extends Controller
     }
 
     /**
-     * Historial completo de solicitudes del estudiante.
-     */
-    public function historial()
-    {
-        $misSolicitudesRecientes = Solicitud::with(['tipoSolicitud', 'estadoActual'])
-            ->where('sol_usu_id', Auth::id())
-            ->orderByDesc('sol_fecha_creacion')
-            ->get();
-
-        return view('user.historial', compact('misSolicitudesRecientes'));
-    }
-
-    /**
      * Formulario para solicitar un trámite específico.
      */
     public function create($id)

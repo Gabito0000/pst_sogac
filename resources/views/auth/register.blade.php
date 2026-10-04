@@ -8,11 +8,17 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
+  @include('partials.cabecera')
+
   <header class="topbar">
     <div class="container topbar__inner">
-      <a href="{{ route('login') }}" class="brand">
+      <a href="{{ route('portada') }}" class="brand" style="text-decoration:none;">
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo</span>
+      </a>
+
+      <a href="{{ route('portada') }}" class="nav__sitio">
+        <i class="bi bi-house-door"></i> Ir al sitio
       </a>
     </div>
   </header>
@@ -173,7 +179,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ date('Y') }} UPTP "Juan de Jesús Montilla" — Solicítalo</p>
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
     </div>
   </footer>
 </body>
