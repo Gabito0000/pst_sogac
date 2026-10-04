@@ -7,6 +7,38 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Solicítalo — Sistema de Solicitudes Estudiantiles
+
+Gestión del proceso de solicitudes de una institución: el estudiante presenta trámites, el
+administrador los aprueba o rechaza, y el sistema deja constancia de todo lo que pasa.
+
+### Módulos
+
+| Módulo | Dónde | Documentación |
+| --- | --- | --- |
+| Panel estadístico (admin) | `/admin/estadisticas` | Métricas del proceso, con exportación a CSV |
+| **Historial de solicitudes** (estudiante) | `/user/historial` | [docs/historial-de-solicitudes.md](docs/historial-de-solicitudes.md) |
+| **Historial de cambios** (admin) | `/admin/cambios` | [docs/historial-de-cambios.md](docs/historial-de-cambios.md) |
+| Preguntas frecuentes y chat | `/user/ayuda/*` | Dos sectores separados dentro de la ayuda |
+
+Los dos historiales son módulos **independientes**: el primero cuenta las solicitudes de cada
+estudiante y su recorrido por los estados; el segundo es una bitácora de todo lo que se modifica
+en el sistema, con su autor y los valores antes y después.
+
+### Puesta en marcha
+
+```bash
+docker compose up -d
+docker exec -it <contenedor-laravel> sh -c "cd /var/www/html && php artisan migrate --seed"
+```
+
+Cuentas de demostración (contraseña `password`): `patricia.medina@demo.test` (administradora) y
+`luis.fernandez3@demo.test` (estudiante con solicitudes).
+
+```bash
+docker exec -it <contenedor-laravel> sh -c "cd /var/www/html && php artisan test"
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
