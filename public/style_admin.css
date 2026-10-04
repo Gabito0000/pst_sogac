@@ -869,3 +869,178 @@ details[open] .acordeon-contenido { animation: deslajarAbajo .3s ease-out forwar
   .nav { justify-content: center; }
 }
 
+/* ============================================================
+   HISTORIAL DE SOLICITUDES Y HISTORIAL DE CAMBIOS
+   Clases usadas por resources/views/user/historial/*,
+   resources/views/admin/cambios/* y los parciales
+   partials/solicitud/timeline y partials/cambios/diff
+   ============================================================ */
+
+/* Barra de filtros: varios controles en una sola rejilla flexible.
+   Antes cada pantalla repetia sus propios <select> con estilo inline, y el
+   listado del estudiante ni siquiera tenia filtros. */
+.filtros {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+.filtros input[type='text'],
+.filtros input[type='date'],
+.filtros select {
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--white);
+  color: var(--black);
+}
+.filtros input[type='text'] { flex: 1; min-width: 220px; }
+.filtros input:focus,
+.filtros select:focus { border-color: var(--red); outline: none; }
+.filtros__rango { display: flex; flex-direction: column; gap: 4px; }
+.filtros__rango span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--gray-700);
+}
+
+/* Aviso de "estás viendo N de M" sobre un listado filtrado */
+.lista__conteo { color: var(--gray-700); font-size: 0.88rem; margin-bottom: 14px; }
+
+/* Pares etiqueta/valor de la ficha de la solicitud */
+.datos { margin: 0; display: grid; gap: 2px; }
+.datos__fila {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.datos__fila:last-child { border-bottom: none; }
+.datos dt { color: var(--gray-700); font-size: 0.85rem; }
+.datos dd { margin: 0; font-weight: 600; font-size: 0.92rem; overflow-wrap: anywhere; }
+
+/* Lista de adjuntos */
+.lista-simple { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.lista-simple li { padding: 10px 12px; background: var(--gray-100); border-radius: var(--radius-sm); }
+.lista-simple__titulo { display: block; font-weight: 600; font-size: 0.9rem; }
+.lista-simple__detalle { display: block; color: var(--gray-700); font-size: 0.8rem; margin-top: 2px; }
+
+/* Línea de tiempo del recorrido de una solicitud */
+.timeline { list-style: none; padding: 0; margin: 0; position: relative; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--gray-200);
+}
+.timeline__item { position: relative; padding: 0 0 20px 30px; }
+.timeline__item:last-child { padding-bottom: 0; }
+.timeline__marcador {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--white);
+  box-shadow: 0 0 0 2px var(--gray-200);
+}
+.timeline__titulo { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.timeline__flecha { color: var(--gray-400); }
+.timeline__meta { color: var(--gray-700); font-size: 0.82rem; margin-top: 3px; }
+.timeline__nota {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--gray-100);
+  border-left: 3px solid var(--red);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.88rem;
+  color: var(--gray-900);
+}
+
+/* Lista de cambios de la bitácora */
+.cambios { display: grid; gap: 14px; }
+.cambio {
+  border: 1px solid var(--gray-200);
+  border-left: 4px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  background: var(--white);
+}
+.cambio--creo { border-left-color: #22a35a; }
+.cambio--actualizo { border-left-color: var(--gray-400); }
+.cambio--elimino { border-left-color: var(--red); }
+
+.cambio__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.cambio__resumen { font-size: 0.95rem; }
+.cambio__entidad {
+  font-size: 0.8rem;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.cambio__cabecera .btn { margin-left: auto; }
+.cambio__pie {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--gray-100);
+  color: var(--gray-400);
+  font-size: 0.78rem;
+}
+
+/* Tabla "campo: valor anterior → valor nuevo" */
+.diff { margin: 0; }
+.diff__titulo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.diff__tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.diff__tabla th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--gray-400);
+  padding: 0 8px 6px 0;
+}
+.diff__col-campo { width: 28%; }
+.diff__col-flecha { width: 24px; }
+.diff__tabla td { padding: 6px 8px 6px 0; vertical-align: top; border-top: 1px solid var(--gray-100); }
+.diff__campo { font-weight: 600; color: var(--black); }
+.diff__valor { color: var(--gray-700); overflow-wrap: anywhere; }
+.diff__valor--anterior { text-decoration: line-through; text-decoration-color: var(--gray-200); }
+.diff__valor--nuevo { color: var(--black); font-weight: 600; }
+.diff__flecha { color: var(--gray-400); text-align: center; }
+
+@media (max-width: 760px) {
+  .filtros input[type='text'] { min-width: 100%; }
+  .datos__fila { grid-template-columns: 1fr; gap: 2px; }
+  .cambio__cabecera .btn { margin-left: 0; }
+  .diff__col-campo { width: 34%; }
+}
+
