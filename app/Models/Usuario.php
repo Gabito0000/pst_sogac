@@ -76,4 +76,39 @@ class Usuario extends Authenticatable
     {
         return 'usu_id';
     }
+
+    // ============================================================
+    // Jerarquia de roles
+    // Los roles posibles son: administrador, analista, taquillero
+    // y estudiante. Solo los tres primeros entran al panel admin.
+    // ============================================================
+
+    public function esAdministrador(): bool
+    {
+        return $this->usu_rol === Rol::ADMINISTRADOR;
+    }
+
+    public function esAnalista(): bool
+    {
+        return $this->usu_rol === Rol::ANALISTA;
+    }
+
+    public function esTaquillero(): bool
+    {
+        return $this->usu_rol === Rol::TAQUILLERO;
+    }
+
+    public function esEstudiante(): bool
+    {
+        return $this->usu_rol === Rol::ESTUDIANTE;
+    }
+
+    /**
+     * Pertenece a la jerarquia administrativa (administrador, analista
+     * o taquillero). Sustituye al antiguo chequeo "usu_rol === 'admin'".
+     */
+    public function esAdministrativo(): bool
+    {
+        return in_array($this->usu_rol, Rol::administrativos(), true);
+    }
 }

@@ -6,7 +6,7 @@
 <div class="container main">
     
     <!-- Validamos que haya un usuario logueado Y que su rol sea admin -->
-    @if(auth()->check() && auth()->user()->usu_rol === 'admin')
+    @if(auth()->check() && auth()->user()->esAdministrativo())
         <!-- Barra de Herramientas -->
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 20px;">
             <button onclick="document.getElementById('modalCrear').style.display='block'" class="btn btn--primary btn--sm" style="background: var(--red);">
@@ -56,12 +56,15 @@
                 </div>
             </details>
 
-            <!-- Solo renderizamos los formularios de edición y eliminación si es admin -->
-            @if(auth()->check() && auth()->user()->usu_rol === 'admin')
-                <!-- Formulario de Eliminación oculto -->
-                <form id="form-eliminar-{{ $pregunta->id }}" method="POST" action="{{ route('admin.soporte.destroy', $pregunta->id) }}" style="display:none;">
-                    @csrf @method('DELETE')
-                </form>
+            {{-- Edición: administrador y analista. El botón de eliminar
+                 queda restringido al administrador (línea de abajo). --}}
+            @if(auth()->check() && auth()->user()->esAdministrativo())
+                {{-- Formulario de Eliminación oculto (solo administrador) --}}
+                @if(auth()->user()->esAdministrador())
+                    <form id="form-eliminar-{{ $pregunta->id }}" method="POST" action="{{ route('admin.soporte.destroy', $pregunta->id) }}" style="display:none;">
+                        @csrf @method('DELETE')
+                    </form>
+                @endif
 
                 <!-- Modal de Edición animado -->
                 <div id="modalEditar{{ $pregunta->id }}" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
@@ -93,8 +96,8 @@
     </div>
 </div>
 
-<!-- Modales generales solo para administradores -->
-@if(auth()->check() && auth()->user()->usu_rol === 'admin')
+<!-- Modales generales para el personal administrativo -->
+@if(auth()->check() && auth()->user()->esAdministrativo())
     <!-- Modal para Crear animado -->
     <div id="modalCrear" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
         <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg);">
@@ -117,18 +120,20 @@
         </div>
     </div>
 
-    <!-- Modal Personalizado para Eliminar -->
+    <!-- Modal Personalizado para Eliminar (solo administrador) -->
+    @if(auth()->user()->esAdministrador())
     <div id="modalConfirmarEliminar" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000;">
         <div class="card modal-content" style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); border-top: 5px solid var(--red-dark);">
             <h3 class="card__title" style="color: var(--red-dark);">Eliminar Pregunta</h3>
             <p style="color: var(--gray-700); margin-top: 10px;">¿Estás totalmente seguro de que deseas eliminar esta pregunta? Esta acción no se puede deshacer.</p>
-            
+
             <div class="actions" style="justify-content: flex-end; margin-top: 24px;">
                 <button type="button" onclick="cerrarModal('modalConfirmarEliminar')" class="btn btn--ghost" style="color: var(--black); border-color: var(--gray-400);">Cancelar</button>
                 <button type="button" onclick="ejecutarEliminacion()" class="btn btn--danger">Sí, Eliminar</button>
             </div>
         </div>
     </div>
+    @endif
 @endif
 
 <!-- Lógica de Interacción JS -->
@@ -260,7 +265,7 @@
 </style>
 
 <!-- Renderizar botón flotante SOLO si es un usuario/estudiante -->
-@if(auth()->check() && auth()->user()->usu_rol !== 'admin')
+@if(auth()->check() && auth()->user()->esEstudiante())
     <a href="{{ route('user.chat.index') }}" class="btn-flotante-chat">
         <span>¿Necesitas más ayuda?<br>¡Comunícate por el chat!</span>
         <!-- Icono de mensaje -->

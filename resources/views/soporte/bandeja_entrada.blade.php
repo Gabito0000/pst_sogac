@@ -13,7 +13,7 @@
     {{-- ========================================================= --}}
     {{-- VISTA DEL ADMINISTRADOR --}}
     {{-- ========================================================= --}}
-    @if(auth()->user()->usu_rol === 'admin')
+    @if(auth()->user()->esAdministrativo())
     
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
         <div>
@@ -163,7 +163,7 @@
                     <thead style="background: #f8f9fa;">
                         <tr>
                             <th style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">ID</th>
-                            @if(auth()->user()->usu_rol === 'admin')
+                            @if(auth()->user()->esAdministrativo())
                                 <th style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">Tema / Etiqueta</th>
                                 <th style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">Estudiante</th>
                             @endif
@@ -177,7 +177,7 @@
                         <tr>
                             <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">#{{ $cerrado->hch_id }}</td>
                             
-                            @if(auth()->user()->usu_rol === 'admin')
+                            @if(auth()->user()->esAdministrativo())
                                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">
                                     <span style="background: #e2e3e5; padding: 3px 8px; border-radius: 12px; font-size: 0.85rem;">
                                         {{ $cerrado->hch_etiqueta_tema ?? 'Sin etiqueta' }}
@@ -195,7 +195,7 @@
                                 {{ $cerrado->updated_at->format('d/m/Y') }}
                             </td>
                             <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; text-align: center;">
-                                <a href="{{ route(auth()->user()->usu_rol === 'admin' ? 'admin.chat.mostrar' : 'user.chat.mostrar', $cerrado->hch_id) }}" style="color: #007bff; text-decoration: none; font-weight: bold;">Ver Chat</a>
+                                <a href="{{ route(auth()->user()->esAdministrativo() ? 'admin.chat.mostrar' : 'user.chat.mostrar', $cerrado->hch_id) }}" style="color: #007bff; text-decoration: none; font-weight: bold;">Ver Chat</a>
                             </td>
                         </tr>
                         @endforeach

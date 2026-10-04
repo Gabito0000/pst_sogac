@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRequisitoController;
+use App\Http\Controllers\AdminSolicitudController;
 use App\Http\Controllers\AdminTipoSolicitudController;
+use App\Http\Controllers\AdminUsuarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PreguntasFrecuentesController;
 use App\Http\Controllers\RegisterController;
@@ -49,24 +51,50 @@ Route::middleware('auth')->prefix('user')->group(function () {
     });
 });
 
-Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+// ============================================================
+// MÓDULO ADMIN
+// El panel exige sesión y cada módulo exige un rol concreto de la
+// jerarquía (administrador > analista > taquillero).
+// Los roles y sus permisos están centralizados en App\Models\Rol.
+// ============================================================
+Route::middleware('auth')->prefix('admin')->group(function () {
 
-    Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
+    // Gestión de usuarios y asignación de roles: solo administrador
+    Route::middleware('rol:administrador')->group(function () {
+        Route::get('/usuarios', [AdminUsuarioController::class, 'index'])->name('admin.usuarios.index');
+        Route::post('/usuarios/agregar', [AdminUsuarioController::class, 'agregarUsuario'])->name('admin.usuarios.agregar');
+        Route::patch('/usuarios/{id}/rol', [AdminUsuarioController::class, 'actualizarRol'])->name('admin.usuarios.rol');
+    });
 
-    Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
-        ->except(['show'])
-        ->names('admin.tipos-solicitud');
+    // Panel estadístico e historial: administrador y analista
+    // (el taquillero procesa solicitudes, pero no ve estadísticas)
+    Route::middleware('rol:administrador,analista')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    });
 
-    Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
-        ->name('admin.tipos-solicitud.alternar-estado');
+    // Aprobar / rechazar solicitudes: los tres roles administrativos
+    Route::middleware('rol:administrador,analista,taquillero')->group(function () {
+        // Cola de solicitudes (página de inicio del taquillero: sin estadísticas)
+        Route::get('/solicitudes', [AdminSolicitudController::class, 'index'])->name('admin.solicitudes.index');
+        Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+    });
 
-    Route::resource('soporte', PreguntasFrecuentesController::class)
-        ->except(['show'])
-        ->names('admin.soporte');
+    // Catálogos (requisitos, trámites y preguntas frecuentes):
+    // administrador y analista
+    Route::middleware('rol:administrador,analista')->group(function () {
+        Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
+        Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
+            ->except(['show'])
+            ->names('admin.tipos-solicitud');
+        Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
+            ->name('admin.tipos-solicitud.alternar-estado');
+        Route::resource('soporte', PreguntasFrecuentesController::class)
+            ->except(['show'])
+            ->names('admin.soporte');
+    });
 
-    Route::middleware('auth')->prefix('soporte/chat')->name('admin.chat.')->group(function () {
+    // Chat de soporte: los tres roles administrativos
+    Route::middleware('rol:administrador,analista,taquillero')->prefix('soporte/chat')->name('admin.chat.')->group(function () {
         Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
         Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
         Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');

@@ -60,7 +60,14 @@ class LoginController extends Controller
     // Lógica de redirección inteligente según el rol[cite: 4]
     private function redireccionarSegunRol($usuario)
     {
-        if ($usuario->usu_rol === 'admin') {
+        // El taquillero no tiene acceso al panel estadistico: entra
+        // directo a la cola de solicitudes, que es su lugar de trabajo.
+        if ($usuario->esTaquillero()) {
+            return redirect()->route('admin.solicitudes.index');
+        }
+
+        // Administrador y analista: panel estadistico.
+        if ($usuario->esAdministrativo()) {
             return redirect()->route('admin.dashboard');
         }
 

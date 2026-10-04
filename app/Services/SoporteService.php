@@ -119,7 +119,7 @@ class SoporteService
     {
         $query = HiloChat::where('hch_estado', 'cerrado')->orderBy('updated_at', 'desc');
 
-        if ($usuario->usu_rol === 'admin') {
+        if ($usuario->esAdministrativo()) {
             return $query->with(['usuario', 'admin'])->paginate($porPagina);
         }
 
@@ -136,7 +136,7 @@ class SoporteService
             'hiloActivo' => null,
         ];
 
-        if ($usuario->usu_rol === 'admin') {
+        if ($usuario->esAdministrativo()) {
             $estado['hilosPendientes'] = HiloChat::with('usuario')
                 ->where('hch_estado', 'pendiente')
                 ->orderBy('created_at', 'asc')

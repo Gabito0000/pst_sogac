@@ -32,23 +32,40 @@
 <body>
   <header class="topbar">
     <div class="container topbar__inner">
-      <a href="{{ route('admin.dashboard') }}" class="brand" style="text-decoration:none;">
+      @php
+        $usuario = Auth::user();
+        // El logo y "Inicio" llevan a la pagina de inicio de cada rol:
+        // el taquillero no puede abrir el panel estadistico (403).
+        $rutaInicio = $usuario->esTaquillero()
+            ? route('admin.solicitudes.index')
+            : route('admin.dashboard');
+    @endphp
+      <a href="{{ $rutaInicio }}" class="brand" style="text-decoration:none;">
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo <span style="font-size: 0.8rem; background: var(--red); padding: 2px 8px; border-radius: 4px;">ADMIN</span></span>
       </a>
       
       <nav class="nav">
-        <a href="{{ route('admin.dashboard') }}">Inicio</a>
-        <a href="{{ route('admin.tipos-solicitud.index') }}">Trámites</a>
-        <a href="{{ route('admin.requisitos.index') }}">Requisitos</a>
+        {{-- El menu solo muestra los modulos permitidos para el rol --}}
+        @if($usuario->esAdministrador() || $usuario->esAnalista())
+          <a href="{{ route('admin.dashboard') }}">Inicio</a>
+          <a href="{{ route('admin.tipos-solicitud.index') }}">Trámites</a>
+          <a href="{{ route('admin.requisitos.index') }}">Requisitos</a>
+        @endif
+
+        {{-- Solicitudes: los tres roles administrativos --}}
+        <a href="{{ route('admin.solicitudes.index') }}">Solicitudes</a>
         <a href="{{ route('admin.chat.index') }}">Soporte</a>
-        
-        @auth
-            <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
-        @else
-            <span class="nav__user">Modo Invitado</span>
-        @endauth
-        
+
+        @if($usuario->esAdministrador())
+          <a href="{{ route('admin.usuarios.index') }}">Usuarios y Roles</a>
+        @endif
+
+        <span class="nav__user">
+          {{ $usuario->usu_primer_nombre ?? 'Invitado' }}
+          <span style="font-size: 0.7rem; background: var(--red); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">{{ \App\Models\Rol::etiqueta($usuario->usu_rol) }}</span>
+        </span>
+
         <form action="{{ route('logout') }}" method="POST" style="margin:0; display:inline;">
           @csrf
           <button type="submit" class="logout-btn">Salir</button>

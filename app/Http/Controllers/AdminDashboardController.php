@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Solicitud;
 use App\Models\EstadoSolicitud;
-use App\Models\TipoSolicitud;
-use App\Models\HistorialEstadoSolicitud; // ¡Bonus para tu proyecto!
+use App\Models\HistorialEstadoSolicitud;
+use App\Models\Solicitud;
+use App\Models\TipoSolicitud; // ¡Bonus para tu proyecto!
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -23,9 +23,9 @@ class AdminDashboardController extends Controller
         if ($request->filled('busqueda')) {
             $termino = $request->input('busqueda');
             $query->whereHas('usuario', function ($q) use ($termino) {
-                $q->where('usu_numero_documento', 'like', '%' . $termino . '%')
-                  ->orWhere('usu_primer_nombre', 'like', '%' . $termino . '%')
-                  ->orWhere('usu_primer_apellido', 'like', '%' . $termino . '%');
+                $q->where('usu_numero_documento', 'like', '%'.$termino.'%')
+                    ->orWhere('usu_primer_nombre', 'like', '%'.$termino.'%')
+                    ->orWhere('usu_primer_apellido', 'like', '%'.$termino.'%');
             });
         }
 
@@ -62,9 +62,9 @@ class AdminDashboardController extends Controller
         $todasLasSolicitudes = Solicitud::with('estadoActual')->get();
         $stats = [
             'pendiente' => $todasLasSolicitudes->where('estadoActual.eso_nombre_estado', 'pendiente')->count(),
-            'aprobada'  => $todasLasSolicitudes->where('estadoActual.eso_nombre_estado', 'aprobada')->count(),
+            'aprobada' => $todasLasSolicitudes->where('estadoActual.eso_nombre_estado', 'aprobada')->count(),
             'rechazada' => $todasLasSolicitudes->where('estadoActual.eso_nombre_estado', 'rechazada')->count(),
-            'total'     => $todasLasSolicitudes->count(),
+            'total' => $todasLasSolicitudes->count(),
         ];
 
         // Lista de tipos de solicitud para llenar el <select> del filtro
@@ -77,7 +77,13 @@ class AdminDashboardController extends Controller
             return view('admin.partials.resultados', compact('solicitudes'));
         }
 
-        return view('admin.dashboard', compact('solicitudes', 'stats', 'tiposSolicitud'));
+        return view('admin.dashboard', [
+            'solicitudes' => $solicitudes,
+            'stats' => $stats,
+            'tiposSolicitud' => $tiposSolicitud,
+            'mostrarEstadisticas' => true,
+            'urlBase' => route('admin.dashboard'),
+        ]);
     }
 
     // Cambiar estado (Equivale a action=aprobar o action=rechazar)
@@ -85,7 +91,7 @@ class AdminDashboardController extends Controller
     {
         // $accion puede ser 'aprobar' o 'rechazar'
         $solicitud = Solicitud::findOrFail($id);
-        
+
         // 1. Buscamos el ID del estado destino en la tabla estado_solicitudes
         $nombreEstado = ($accion === 'aprobar') ? 'aprobada' : 'rechazada';
         $estadoNuevo = EstadoSolicitud::where('eso_nombre_estado', $nombreEstado)->firstOrFail();
@@ -100,11 +106,11 @@ class AdminDashboardController extends Controller
 
         // 2. Actualizamos la solicitud con el nuevo ID de estado
         $solicitud->update([
-            'sol_eso_id' => $estadoNuevo->eso_id
+            'sol_eso_id' => $estadoNuevo->eso_id,
         ]);
 
-        $mensaje = ($accion === 'aprobar') 
-            ? 'La solicitud ha sido aprobada con éxito.' 
+        $mensaje = ($accion === 'aprobar')
+            ? 'La solicitud ha sido aprobada con éxito.'
             : 'La solicitud ha sido rechazada.';
 
         // Si el pedido viene del JS del modal (fetch), respondemos con un
