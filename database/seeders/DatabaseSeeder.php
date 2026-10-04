@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(SolicitudesDePruebaSeeder::class);
+        $this->call(SolicitudesPanelEstadisticasSeeder::class);
     }
 }

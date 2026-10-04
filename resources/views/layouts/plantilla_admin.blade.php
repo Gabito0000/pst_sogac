@@ -38,10 +38,11 @@
       </a>
       
       <nav class="nav">
-        <a href="{{ route('admin.dashboard') }}">Inicio</a>
-        <a href="{{ route('admin.tipos-solicitud.index') }}">Trámites</a>
-        <a href="{{ route('admin.requisitos.index') }}">Requisitos</a>
-        <a href="{{ route('admin.chat.index') }}">Soporte</a>
+        <a href="{{ route('admin.dashboard') }}" @if (request()->routeIs('admin.dashboard*')) aria-current="page" @endif>Inicio</a>
+        <a href="{{ route('admin.tipos-solicitud.index') }}" @if (request()->routeIs('admin.tipos-solicitud*')) aria-current="page" @endif>Trámites</a>
+        <a href="{{ route('admin.requisitos.index') }}" @if (request()->routeIs('admin.requisitos*')) aria-current="page" @endif>Requisitos</a>
+        <a href="{{ route('admin.estadisticas') }}" @if (request()->routeIs('admin.estadisticas*')) aria-current="page" @endif>Estadísticas</a>
+        <a href="{{ route('admin.chat.index') }}" @if (request()->routeIs('admin.chat*')) aria-current="page" @endif>Soporte</a>
         
         @auth
             <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>

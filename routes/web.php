@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminEstadisticasController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\LoginController;
@@ -49,9 +50,14 @@ Route::middleware('auth')->prefix('user')->group(function () {
     });
 });
 
-Route::prefix('admin')->group(function () {
+// El prefijo admin exige rol 'admin' + usuario autenticado (middleware EsAdmin).
+Route::middleware('admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+
+    // Panel estadístico: métricas precisas de todo el proceso de las solicitudes.
+    Route::get('/estadisticas', [AdminEstadisticasController::class, 'index'])->name('admin.estadisticas');
+    Route::get('/estadisticas/exportar', [AdminEstadisticasController::class, 'exportar'])->name('admin.estadisticas.exportar');
 
     Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
 
