@@ -53,11 +53,21 @@ class PreguntasFrecuentesService
      */
     public function update(int $id, array $data): bool
     {
-        return PreguntasFrecuentes::where('id', $id)->update($data);
+        // Se actualiza sobre la instancia y no con PreguntasFrecuentes::where(...)->update()
+        // porque las consultas de masses no disparan los eventos del modelo, y el
+        // trait que escribe la bitácora de cambios está escuchando a 'updated':
+        // con la consulta en crudo las ediciones de las preguntas quedaban sin
+        // registrar.
+        return PreguntasFrecuentes::where('id', $id)->firstOrFail()->update($data);
     }
 
+    /**
+     * @param  array{pregunta: string, respuesta: string}  $data
+     */
     public function delete(int $id): bool
     {
-        return PreguntasFrecuentes::where('id', $id)->delete();
+        // Mismo motivo que en update(): el evento 'deleted' solo se dispara al
+        // borrar la instancia.
+        return PreguntasFrecuentes::where('id', $id)->firstOrFail()->delete();
     }
 }

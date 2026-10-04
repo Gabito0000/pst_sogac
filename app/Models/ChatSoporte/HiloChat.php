@@ -2,11 +2,14 @@
 
 namespace App\Models\ChatSoporte;
 
+use App\Models\Concerns\RegistraCambios;
 use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Model;
 
 class HiloChat extends Model
 {
+    use RegistraCambios;
+
     protected $table = 'hilos_chat';
 
     protected $primaryKey = 'hch_id';

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraCambios;
 use Illuminate\Database\Eloquent\Model;
 
 class PreguntasFrecuentes extends Model
 {
-    protected $fillable = ['pregunta','respuesta'];
+    use RegistraCambios;
+
+    protected $fillable = ['pregunta', 'respuesta'];
+
     public const PAGINATE = 10;
 }

@@ -47,9 +47,13 @@
 
         <span class="nav__sep" aria-hidden="true"></span>
 
-        {{-- Sector 2: medicion del proceso. --}}
+        {{-- Sector 2: medicion del proceso y trazabilidad.
+             "Estadísticas" responde cuánto va el proceso de solicitudes y
+             "Historial de cambios" responde quién tocó qué y con qué valores:
+             son dos preguntas distintas y por eso dos entradas. --}}
         <div class="nav__group">
           <a href="{{ route('admin.estadisticas') }}" @if (request()->routeIs('admin.estadisticas*')) aria-current="page" @endif>Estadísticas</a>
+          <a href="{{ route('admin.cambios.index') }}" @if (request()->routeIs('admin.cambios.*')) aria-current="page" @endif>Historial de cambios</a>
         </div>
 
         <span class="nav__sep" aria-hidden="true"></span>
