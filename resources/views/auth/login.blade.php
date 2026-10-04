@@ -7,11 +7,17 @@
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
 </head>
 <body>
+  @include('partials.cabecera')
+
   <header class="topbar">
     <div class="container topbar__inner">
-      <a href="{{ route('login') }}" class="brand">
+      <a href="{{ route('portada') }}" class="brand" style="text-decoration:none;">
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo</span>
+      </a>
+
+      <a href="{{ route('portada') }}" class="nav__sitio">
+        <i class="bi bi-house-door"></i> Ir al sitio
       </a>
     </div>
   </header>
@@ -21,7 +27,7 @@
       <div class="auth-card">
         <div class="auth-card__head">
           <h1>Bienvenido</h1>
-          <p>Ingresa a tu cuenta estudiantil</p>
+          <p>Solicítalo · Sistema de Solicitudes Estudiantiles</p>
         </div>
         <div class="auth-card__body">
           
@@ -61,7 +67,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles</p>
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
     </div>
   </footer>
 </body>

@@ -12,16 +12,13 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserSolicitudController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-
-    return redirect()->route('login');
-});
+// El homepage institucional es la pagina principal y se muestra siempre,
+// haya sesion o no: quien ya esta dentro del sistema tiene su acceso directo
+// en el boton "Mi panel" de la barra del homepage. El sistema en si vive en
+// /login, /user y /admin.
+Route::view('/', 'portada')->name('portada');
 
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.post');

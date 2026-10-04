@@ -1,19 +1,24 @@
 /* =====================================================
-   Sistema de Solicitudes — Tema Rojo / Negro / Blanco
+   Sistema de Solicitudes — Tema institucional UPTP
+   =====================================================
+   Los colores vienen del homepage (public/portada/style.css): el mismo rojo
+   institucional para que el sistema y la pagina publica se vean como parte
+   de la misma marca y no como dos productos distintos. Antes el sistema
+   usaba un rojo generico (#e11d2e) sobre una cabecera negra.
    ===================================================== */
 :root {
-  --red: #e11d2e;
-  --red-dark: #a30f1c;
-  --red-glow: #ff3448;
-  --black: #0d0d0d;
-  --black-soft: #1a1a1a;
+  --red: #c8102e;
+  --red-dark: #8b0a1f;
+  --red-soft: #ffe5ea;
+  --black: #1a1a1a;
+  --black-soft: #2a2a2a;
   --gray-900: #222;
   --gray-700: #4a4a4a;
   --gray-400: #9a9a9a;
   --gray-200: #e6e6e6;
   --gray-100: #f4f4f4;
   --white: #ffffff;
-  --shadow-lg: 0 20px 40px -12px rgba(225, 29, 46, 0.35);
+  --shadow-lg: 0 20px 40px -12px rgba(200, 16, 46, 0.35);
   --shadow-md: 0 6px 20px -8px rgba(0, 0, 0, 0.25);
   --radius: 14px;
   --radius-sm: 8px;
@@ -45,33 +50,68 @@ a:hover { color: var(--red-dark); }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; width: 100%; }
 
-/* Header y Animaciones del Menú */
+/* ============================================================
+   CABECERA INSTITUCIONAL
+   Copia la estructura del homepage: una franja blanca con el logo de la
+   UPTP y la insignia "Control de Estudios", y debajo la barra roja con la
+   navegacion del sistema. Es el mismo cuerpo visual que la pagina publica.
+   ============================================================ */
+.cinta {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.cinta__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 10px 24px; flex-wrap: wrap;
+}
+.cinta__marca {
+  display: flex; align-items: center; gap: 14px;
+  color: var(--black); text-decoration: none;
+}
+.cinta__logo { height: 46px; width: auto; display: block; }
+.cinta__texto { display: flex; flex-direction: column; line-height: 1.15; }
+.cinta__texto strong {
+  font-size: 1.15rem; font-weight: 700; color: var(--black); letter-spacing: 0.01em;
+}
+.cinta__texto small {
+  font-size: 0.78rem; font-weight: 600; color: var(--gray-700);
+}
+.cinta__insignia {
+  background: var(--red); color: var(--white);
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Barra de navegacion: roja, como la del homepage */
 .topbar {
-  background: var(--gradient-dark);
+  background: var(--red);
   color: var(--white);
-  border-bottom: 3px solid var(--red);
-  box-shadow: var(--shadow-md);
+  border-bottom: 3px solid var(--red-dark);
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.4);
 }
 .topbar__inner {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px; gap: 16px; flex-wrap: wrap;
+  padding: 12px 24px; gap: 16px; flex-wrap: wrap;
 }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--white); font-weight: 700; font-size: 1.1rem; }
 .brand__mark {
   width: 36px; height: 36px; border-radius: 10px;
-  background: var(--gradient-red);
+  background: var(--white);
   display: grid; place-items: center;
-  color: var(--white); font-weight: 800;
-  box-shadow: 0 6px 14px -4px var(--red);
+  color: var(--red); font-weight: 800;
 }
-.brand__accent { color: var(--red-glow); }
 
-/* Navegación: Fondo transparente por defecto, hover rojo */
-.nav { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  flex-wrap: wrap; 
+/* Navegación sobre la barra roja.
+   El hover ya no puede "ponerse rojo" como antes: la barra es roja, así que un
+   hover rojo no se vería. Se usa un velo blanco suave y el subrayado que ya
+   tenía el homepage. */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .nav a,
@@ -88,20 +128,32 @@ a:hover { color: var(--red-dark); }
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  position: relative;
 }
+
+/* Subrayado que crece desde el centro, igual que el navbar del homepage */
+.nav a::after,
+.nav .btn-nav::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 2px;
+  width: 0; height: 2px;
+  background-color: var(--white);
+  transition: all 0.3s ease;
+}
+.nav a:hover::after,
+.nav .btn-nav:hover::after { width: 80%; left: 10%; }
 
 .nav a:hover,
 .nav .btn-nav:hover {
-  background: var(--gradient-red);
+  background: rgba(255, 255, 255, 0.16);
   color: var(--white);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(225, 29, 46, 0.4);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-.nav__user { 
-  color: var(--gray-400); 
-  font-size: 0.9rem; 
+.nav__user {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
   padding: 0 4px;
 }
 
@@ -415,11 +467,12 @@ a:hover { color: var(--red-dark); }
 }
 
 .nav a[aria-current='page'] {
-  background: var(--gradient-red);
-  color: var(--white);
+  background: var(--white);
+  color: var(--red);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(225, 29, 46, 0.35);
+  border-color: var(--white);
 }
+.nav a[aria-current='page']::after { display: none; }
 
 /* Modal */
 .modal-overlay {
@@ -692,17 +745,48 @@ details[open] .acordeon-contenido { animation: deslajarAbajo .3s ease-out forwar
 .pagina-link { text-decoration: none; }
 
 /* ============================================================
+   PORTADA INSTITUCIONAL Y ENLACES DE VUELTA
+   ============================================================ */
+
+/* "Ir al sitio": lleva al homepage, que es la pagina principal. Se separa
+   del resto con un borde para que no se confunda con un enlace de sector. */
+.nav__sitio {
+  color: var(--white);
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.25s ease-in-out;
+  white-space: nowrap;
+}
+.nav__sitio:hover {
+  background: var(--white);
+  color: var(--red);
+  border-color: var(--white);
+}
+
+/* Pie: la institucion primero, como en el homepage */
+.footer {
+  text-align: center;
+}
+.footer p { margin: 0; }
+
+@media (max-width: 768px) {
+  .cinta__inner { justify-content: center; text-align: center; }
+  .cinta__logo { height: 38px; }
+}
+
+/* ============================================================
    PANEL ESTADISTICO DE SOLICITUDES
    Clases usadas por resources/views/admin/estadisticas.blade.php
    ============================================================ */
 
-/* Enlace activo del menu (se marca con aria-current en las vistas) */
-.nav a[aria-current='page'] {
-  background: var(--gradient-red);
-  color: var(--white);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(225, 29, 46, 0.4);
-}
+/* El enlace activo se resuelve mas arriba, junto al resto de la navegacion. */
 
 /* Barra de herramientas del panel (rango + exportar) */
 .panel-toolbar {

@@ -30,6 +30,8 @@
   </style>
 </head>
 <body>
+  @include('partials.cabecera')
+
   <header class="topbar">
     <div class="container topbar__inner">
       <a href="{{ route('dashboard') }}" class="brand" style="text-decoration:none;">
@@ -58,6 +60,13 @@
           <a href="{{ route('user.ayuda.chat.index') }}" @if (request()->routeIs('user.ayuda.chat.*')) aria-current="page" @endif>Chat</a>
         </div>
 
+        <span class="nav__sep" aria-hidden="true"></span>
+
+        {{-- Vuelta al homepage, que es la pagina principal del sitio. --}}
+        <a href="{{ route('portada') }}" class="nav__sitio">
+          <i class="bi bi-house-door"></i> Ir al sitio
+        </a>
+
         <span class="nav__user">{{ Auth::user()->usu_primer_nombre ?? 'Invitado' }}</span>
         
         <form action="{{ route('logout') }}" method="POST" style="margin:0; display:inline;">
@@ -74,7 +83,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles</p>
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
     </div>
   </footer>
 

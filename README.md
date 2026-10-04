@@ -25,6 +25,29 @@ Los dos historiales son módulos **independientes**: el primero cuenta las solic
 estudiante y su recorrido por los estados; el segundo es una bitácora de todo lo que se modifica
 en el sistema, con su autor y los valores antes y después.
 
+### Homepage
+
+`/` sirve el **homepage institucional** de Control de Estudios (UPTP "Juan de Jesús Montilla"), que
+es la página principal del sitio. Se muestra siempre, haya sesión o no; quien ya está dentro del
+sistema tiene un acceso directo en el botón «Mi panel».
+
+El homepage vive en `resources/views/portada.blade.php` y sus recursos en `public/portada/`
+(logotipo, imágenes del carrusel, estilos y script). Es una página estática con Bootstrap por CDN,
+así que no pasa por Vite.
+
+El enlace entre los dos es doble: el homepage ofrece **«Entrar al sistema»** en la barra y en el pie,
+y el sistema devuelve al homepage con **«Ir al sitio»**, además del logo de la franja institucional.
+
+### Identidad visual
+
+El sistema toma la paleta del homepage para que ambos se vean como una sola marca:
+
+| | Valor |
+| --- | --- |
+| Rojo institucional | `#c8102e` (`--red`), oscuro `#8b0a1f`, suave `#ffe5ea` |
+| Cabecera | Franja blanca con el logo y la insignia «Control de Estudios», y debajo la barra roja |
+| Contraste | Texto blanco sobre la barra roja: 5.88:1, por encima del 4.5:1 que pide WCAG AA |
+
 ### Puesta en marcha
 
 ```bash
