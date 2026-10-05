@@ -493,6 +493,12 @@ a:hover { color: var(--red-dark); }
 .modal-overlay[data-abierto='1'] { display: flex; }
 
 .modal {
+  /* display:block es imprescindible: el CSS de Bootstrap (que se sigue
+     importando en resources/js/app.js) define ".modal { display: none }" y, al
+     no competir con esta regla, ese display se colaba. Se veía el fondo gris
+     del overlay pero no la caja del diálogo: al pulsar "Nueva consulta" la
+     pantalla quedaba a oscuras y sin forma de cerrar el formulario. */
+  display: block;
   background: var(--white);
   border-radius: var(--radius);
   padding: 28px;
