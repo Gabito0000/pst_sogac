@@ -29,6 +29,12 @@
             'funciones' => [
                 ['ruta' => 'admin.solicitudes.index', 'texto' => 'Cola de solicitudes', 'patrones' => ['admin.solicitudes.*']],
                 ['ruta' => 'admin.dashboard', 'texto' => 'Todas las solicitudes', 'patrones' => ['admin.dashboard'], 'visible' => $esAdminOAnalista],
+                [
+                    'ruta' => 'admin.tratadas.index',
+                    'texto' => 'Solicitudes tratadas',
+                    'patrones' => ['admin.tratadas.*'],
+                    'visible' => $esAdminOAnalista,
+                ],
             ],
         ],
         [

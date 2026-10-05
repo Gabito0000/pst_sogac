@@ -296,8 +296,20 @@
             const botonesAccion = modalAcciones.querySelectorAll('button');
             botonesAccion.forEach(function (b) { b.disabled = true; b.style.opacity = '0.6'; });
 
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-              .then(function (respuesta) { return respuesta.json(); })
+            // POST y no GET: resolver cambia datos, asi que necesita token CSRF.
+            // Es el unico cambio de comportamiento; el modal se ve igual.
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+              },
+              credentials: 'same-origin'
+            })
+              .then(function (respuesta) {
+                if (!respuesta.ok) throw new Error('HTTP ' + respuesta.status);
+                return respuesta.json();
+              })
               .then(function () {
                 listaActual[indiceActual].dataset.estado = nuevoEstado;
                 pintarModal();

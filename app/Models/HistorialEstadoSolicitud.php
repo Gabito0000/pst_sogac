@@ -7,17 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 class HistorialEstadoSolicitud extends Model
 {
     protected $table = 'historial_estado_solicitudes';
+
     protected $primaryKey = 'hes_id';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'hes_sol_id', 
-        'hes_usu_id_responsable', 
-        'hes_eso_id_anterior', 
-        'hes_eso_id_nuevo', 
-        'hes_observaciones_comentarios', 
-        'hes_fecha_cambio'
+        'hes_sol_id',
+        'hes_usu_id_responsable',
+        'hes_eso_id_anterior',
+        'hes_eso_id_nuevo',
+        'hes_observaciones_comentarios',
+        'hes_fecha_cambio',
     ];
+
+    /**
+     * Sin este cast la fecha llega como texto y cualquier ->format() revienta.
+     * Los histogramas ya usan Carbon::parse(), asi que castear no les rompe nada.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'hes_fecha_cambio' => 'datetime',
+        ];
+    }
+
     public function solicitud()
     {
         return $this->belongsTo(Solicitud::class, 'hes_sol_id', 'sol_id');
