@@ -583,6 +583,58 @@ a:hover { color: var(--red-dark); }
   transform: translateY(-50%);
 }
 .nav__item:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* Entrada directa del menu: el enlace principal y, a su lado, el acceso
+   rapido a la pantalla relacionada (de preguntas frecuentes al chat). Es una
+   sola fila para que el conjunto se lea como una opcion del menu y no como
+   dos. */
+.nav__fila {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  flex: 0 0 auto;
+}
+.nav__fila > .nav__item {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav__extra {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav__extra:hover { background: rgba(255, 255, 255, 0.14); color: var(--white); }
+
+/* Contador de pendientes: en blanco sobre el rojo de la barra, para que se
+   lea de un vistazo. */
+.nav__contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--red);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
 .nav__item.activa {
   background: rgba(255, 255, 255, 0.2);
   font-weight: 700;
