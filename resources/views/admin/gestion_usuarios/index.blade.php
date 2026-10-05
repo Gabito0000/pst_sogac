@@ -4,13 +4,86 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-6">
+
+    @if(session('success'))
+        <div class="mb-4 rounded border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>
+    @endif
+
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Gestión de Usuarios</h2>
     </div>
 
+    <!-- ===================================================== -->
+    <!-- AGREGAR A UN USUARIO AL PERSONAL ADMINISTRATIVO        -->
+    <!-- ===================================================== -->
+    <div class="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-5">
+        <h3 class="text-lg font-bold text-gray-800 mb-1">Agregar a un usuario</h3>
+        <p class="text-sm text-gray-600 mb-4">
+            Escribe el correo electrónico de la persona y asígnale un rol.
+            La persona debe estar registrada en el sistema (puede haberse registrado como estudiante).
+        </p>
+
+        <form method="POST" action="{{ route('admin.usuarios.agregar') }}"
+              class="flex flex-wrap items-end gap-3">
+            @csrf
+            <div class="flex-1" style="min-width: 240px;">
+                <label for="email" class="block text-xs font-medium text-gray-600 mb-1">Correo electrónico</label>
+                <input type="email" id="email" name="email" required value="{{ old('email') }}"
+                       placeholder="ejemplo: gabriel@uptp.edu.ve"
+                       class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div style="min-width: 180px;">
+                <label for="rol" class="block text-xs font-medium text-gray-600 mb-1">Rol que tendrá</label>
+                <select id="rol" name="rol" required
+                        class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @foreach($roles as $opcion)
+                        <option value="{{ $opcion }}" @selected(old('rol') === $opcion)>{{ \App\Models\Rol::etiqueta($opcion) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">
+                Agregar
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- JERARQUÍA DE ROLES                                  -->
+    <!-- ===================================================== -->
+    <details class="mb-8 rounded-lg border border-gray-200 bg-white">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-gray-800">
+            Jerarquía de roles y permisos
+        </summary>
+        <div class="overflow-x-auto px-5 pb-4">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 border-b text-left text-xs uppercase text-gray-500">Rol</th>
+                        <th class="px-4 py-2 border-b text-left text-xs uppercase text-gray-500">Capacidades</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach(\App\Models\Rol::administrativos() as $rol)
+                        <tr>
+                            <td class="px-4 py-2 font-semibold">{{ \App\Models\Rol::etiqueta($rol) }}</td>
+                            <td class="px-4 py-2 text-gray-600">{{ \App\Models\Rol::descripcion($rol) }}</td>
+                        </tr>
+                    @endforeach
+                    <tr>
+                        <td class="px-4 py-2 font-semibold">{{ \App\Models\Rol::etiqueta(\App\Models\Rol::ESTUDIANTE) }}</td>
+                        <td class="px-4 py-2 text-gray-600">{{ \App\Models\Rol::descripcion(\App\Models\Rol::ESTUDIANTE) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
     <!-- Barra de Búsqueda -->
     <div class="mb-6 relative">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre, apellido, correo o rol..." 
+        <input type="text" id="searchInput" placeholder="Buscar por nombre, apellido, correo o rol..."
                class="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                autocomplete="off">
         <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,10 +156,11 @@
             </div>
             <div class="col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Rol del Usuario</label>
-                <!-- Los únicos roles válidos según la migración son estudiante y admin -->
+                <!-- Jerarquía completa definida en App\Models\Rol -->
                 <select name="usu_rol" id="edit_rol" class="mt-1 w-full border rounded p-2">
-                    <option value="estudiante">Estudiante</option>
-                    <option value="admin">Administrador</option>
+                    @foreach(\App\Models\Rol::todos() as $opcion)
+                        <option value="{{ $opcion }}">{{ \App\Models\Rol::etiqueta($opcion) }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>

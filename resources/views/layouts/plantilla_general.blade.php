@@ -105,18 +105,32 @@
     <!-- ENLACES DE NAVEGACIÓN -->
     <nav class="flex flex-col px-4 space-y-2">
       @auth
-        @if(Auth::user()->usu_rol == 'admin')
-          <!-- ADMINISTRADOR -->
-          <a href="{{ route('admin.tipos-solicitud.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestionar Trámites</a>
-          <a href="{{ route('admin.requisitos.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Catálogo de Requisitos</a>
-          <a href="{{ route('admin.chat.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Bandeja de Soporte</a>
-          <a href="{{ route('admin.usuarios.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestión de Usuarios</a>
-        @else
-          <!-- ESTUDIANTE -->
+        @php $usuario = Auth::user(); @endphp
+
+        @if($usuario->esEstudiante())
+          <!-- ==================== ESTUDIANTE ==================== -->
           <a href="{{ route('dashboard') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Inicio</a>
           <a href="{{ route('dashboard') }}#mis-solicitudes" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Mis Solicitudes</a>
           <a href="{{ route('user.citas') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Calendario</a>
           <a href="{{ route('soporte.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Ayuda</a>
+
+        @else
+          {{-- ============ PERSONAL ADMINISTRATIVO ============ --}}
+          {{-- Cada enlace se muestra solo si el rol lo permite --}}
+
+          @if($usuario->esAdministrador() || $usuario->esAnalista())
+            <a href="{{ route('admin.dashboard') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Panel Estadístico</a>
+            <a href="{{ route('admin.tipos-solicitud.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestionar Trámites</a>
+            <a href="{{ route('admin.requisitos.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Catálogo de Requisitos</a>
+          @endif
+
+          {{-- Solicitudes: los tres roles --}}
+          <a href="{{ route('admin.solicitudes.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Solicitudes</a>
+          <a href="{{ route('admin.chat.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Bandeja de Soporte</a>
+
+          @if($usuario->esAdministrador())
+            <a href="{{ route('admin.usuarios.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestión de Usuarios</a>
+          @endif
         @endif
       @else
         <!-- INVITADO -->

@@ -137,7 +137,7 @@ class SoporteController extends Controller
     {
         $hilo = $this->soporteService->obtenerChatConMensajes($hch_id);
 
-        $esAdmin = Auth::user()->usu_rol === 'admin';
+        $esAdmin = Auth::user()->esAdministrativo();
 
         if (! $esAdmin && $hilo->hch_id_usuario !== Auth::id()) {
             abort(403, 'No tienes permiso para ver este chat.');

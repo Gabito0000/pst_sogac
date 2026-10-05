@@ -30,6 +30,7 @@ class Usuario extends Authenticatable
         'usu_fecha_registro',
         'usu_ultimo_acceso',
     ];
+
     public function getEmailForPasswordReset()
     {
         return $this->usu_correo_electronico;
@@ -80,10 +81,46 @@ class Usuario extends Authenticatable
     {
         return 'usu_id';
     }
-    
+
     // Esto le dice al cartero de Laravel a qué dirección exacta enviar el mensaje
     public function routeNotificationForMail($notification = null)
     {
         return $this->usu_correo_electronico;
+    }
+
+    // ============================================================
+    // Jerarquia de roles
+    // Roles: administrador > analista > taquillero, mas estudiante.
+    // Solo los tres primeros entran al panel administrativo.
+    // Definidos en App\Models\Rol.
+    // ============================================================
+
+    public function esAdministrador(): bool
+    {
+        return $this->usu_rol === Rol::ADMINISTRADOR;
+    }
+
+    public function esAnalista(): bool
+    {
+        return $this->usu_rol === Rol::ANALISTA;
+    }
+
+    public function esTaquillero(): bool
+    {
+        return $this->usu_rol === Rol::TAQUILLERO;
+    }
+
+    public function esEstudiante(): bool
+    {
+        return $this->usu_rol === Rol::ESTUDIANTE;
+    }
+
+    /**
+     * Pertenece a la jerarquia administrativa (administrador, analista
+     * o taquillero). Sustituye al antiguo chequeo "usu_rol === 'admin'".
+     */
+    public function esAdministrativo(): bool
+    {
+        return in_array($this->usu_rol, Rol::administrativos(), true);
     }
 }

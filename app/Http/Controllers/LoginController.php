@@ -20,6 +20,7 @@ class LoginController extends Controller
         if (Auth::check()) {
             return $this->redireccionarSegunRol(Auth::user());
         }
+
         return view('auth.login');
     }
 
@@ -32,6 +33,7 @@ class LoginController extends Controller
 
         if ($this->authService->attemptLogin($request->identificador, $request->password, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
             return $this->redireccionarSegunRol(Auth::user());
         }
 
@@ -45,13 +47,26 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/login');
     }
 
+    /**
+     * Cada rol de la jerarquía entra a su propia página:
+     * - taquillero: la cola de solicitudes (no ve el panel estadístico)
+     * - administrador y analista: el panel administrativo
+     * - estudiante: su panel (/user/dashboard)
+     */
     private function redireccionarSegunRol($usuario)
     {
-        return $usuario->usu_rol === 'admin' 
-            ? redirect()->route('admin.dashboard') 
-            : redirect()->route('dashboard');
+        if ($usuario->esTaquillero()) {
+            return redirect()->route('admin.solicitudes.index');
+        }
+
+        if ($usuario->esAdministrativo()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
     }
 }

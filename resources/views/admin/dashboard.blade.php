@@ -3,6 +3,13 @@
 @section('title', 'Panel de Administración')
 
 @section('content')
+@php
+    // La misma vista sirve para el panel estadístico y para la cola de
+    // solicitudes del taquillero: solo cambian los datos que recibe.
+    // El taquillero no tiene acceso a las tarjetas de estadísticas.
+    $mostrarEstadisticas ??= true;
+    $urlBase ??= route('admin.dashboard');
+@endphp
 <div class="container main">
     <section class="hero" style="background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 6px solid var(--red); padding: 24px; border-radius: var(--radius); color: white; margin-bottom: 24px;">
       <h1 style="font-size: 1.6rem; margin-bottom: 6px;">Panel de Control Administrativo</h1>
@@ -14,6 +21,7 @@
         <div class="alert alert--success">{{ session('success') }}</div>
     @endif
 
+    @if($mostrarEstadisticas)
     <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
       {{-- Cada tarjeta es un link que filtra directamente por ese estado. El "Total" limpia el filtro de estado. --}}
       <a href="{{ route('admin.dashboard') }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--black); {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
@@ -33,6 +41,7 @@
         <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['rechazada'] }}</div>
       </a>
     </div>
+    @endif
 
     <div class="card" style="background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-md);">
       <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;">Listado de Solicitudes Estudiantiles</h2>
@@ -103,7 +112,7 @@
            el JS de más abajo intercepta cada acción (escribir, cambiar el select,
            hacer clic en una pestaña o en la paginación) y pide los datos con fetch(),
            sin recargar la página. --}}
-      <form method="GET" action="{{ route('admin.dashboard') }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
+      <form method="GET" action="{{ $urlBase }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
         <div class="buscador-caja">
           <i class="ti ti-search" aria-hidden="true"></i>
           <input
@@ -176,7 +185,7 @@
           const selectTipo = document.getElementById('tipo_solicitud');
           const wrapper = document.getElementById('resultados-wrapper');
           const tabs = document.querySelectorAll('.tab-estado');
-          const urlBase = "{{ route('admin.dashboard') }}";
+          const urlBase = "{{ $urlBase }}";
 
           // Estado actual de los filtros (arranca con lo que ya viene en la URL)
           let estadoActual = new URLSearchParams(window.location.search).get('estado') || '';
