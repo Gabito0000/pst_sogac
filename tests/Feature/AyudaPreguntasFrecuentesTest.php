@@ -37,7 +37,7 @@ function ayudaEstudiante(string $documento = 'V-20000001'): Usuario
 
 function ayudaAdmin(string $documento = 'V-10000001'): Usuario
 {
-    return ayudaUsuario('admin', $documento, 'V');
+    return ayudaUsuario('administrador', $documento, 'V');
 }
 
 /*

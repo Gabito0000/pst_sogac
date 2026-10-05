@@ -1,43 +1,29 @@
 @extends('layouts.plantilla_admin')
 
-@section('title', 'Gestión de Trámites')
+@section('title', 'Trámites')
 
 @section('content')
-<div class="container main">
-    @if($errors->any())
-        <div class="alert alert--error">
-            <ul style="margin:0; padding-left:20px;">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    @include('partials.avisos')
+
+    <div class="pagina-head">
+        <div>
+            <h1 class="pagina-head__titulo">Trámites disponibles</h1>
+            <p class="pagina-head__desc">
+                Aquí creas cada trámite (Cambio de Carrera, Constancia, etc.), defines por cuánto
+                tiempo estará disponible para los estudiantes, y qué documentos deben entregar.
+            </p>
         </div>
-    @endif
-
-    @if(session('success'))
-        <div class="alert alert--success">{{ session('success') }}</div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert--error">{{ session('error') }}</div>
-    @endif
+        <div class="pagina-head__acciones">
+            <a href="{{ route('admin.tipos-solicitud.create') }}" class="btn btn--primary">+ Nuevo trámite</a>
+        </div>
+    </div>
 
     <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-            <div>
-                <h2 class="card__title">Trámites disponibles</h2>
-                <p class="card__sub" style="margin-bottom:0;">
-                    Aquí creas cada trámite (Cambio de Carrera, Constancia, etc.), defines por cuánto tiempo estará
-                    disponible para los estudiantes, y qué documentos deben entregar.
-                </p>
-            </div>
-            <a href="{{ route('admin.tipos-solicitud.create') }}" class="btn btn--primary">+ Nuevo Trámite</a>
-        </div>
-
-        @if($tipos->isEmpty())
-            <p>
+        @if ($tipos->isEmpty())
+            <p class="estado-vacio">
                 Aún no hay ningún trámite creado.
-                <a href="{{ route('admin.tipos-solicitud.create') }}">Crea el primero aquí.</a>
+                <br>
+                <a href="{{ route('admin.tipos-solicitud.create') }}">Crea el primero aquí</a>.
             </p>
         @else
             <div class="table-wrap">
@@ -48,7 +34,7 @@
                             <th>Disponibilidad</th>
                             <th>Requisitos</th>
                             <th>Estado</th>
-                            <th style="text-align:right;">Acciones</th>
+                            <th class="table__acciones">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,34 +42,35 @@
                             <tr>
                                 <td>
                                     <strong>{{ $tipo->tsi_nombre_tipo }}</strong>
-                                    @if($tipo->tsi_descripcion)
-                                        <div style="font-size:0.85rem; color:var(--gray-700);">{{ $tipo->tsi_descripcion }}</div>
+                                    @if ($tipo->tsi_descripcion)
+                                        <div class="kpi__hint">{{ $tipo->tsi_descripcion }}</div>
                                     @endif
                                 </td>
-                                <td style="font-size:0.85rem; white-space:nowrap;">
-                                    @if($tipo->tsi_fecha_inicio || $tipo->tsi_fecha_fin)
+                                <td style="white-space:nowrap;">
+                                    @if ($tipo->tsi_fecha_inicio || $tipo->tsi_fecha_fin)
                                         {{ $tipo->tsi_fecha_inicio?->format('d/m/Y') ?? 'Sin inicio' }}
                                         &rarr;
                                         {{ $tipo->tsi_fecha_fin?->format('d/m/Y') ?? 'Sin cierre' }}
-                                        <br>
-                                        @if($tipo->estaDisponible())
-                                            <span style="color:#14683a; font-weight:600;">● Dentro del rango</span>
-                                        @else
-                                            <span style="color:var(--gray-400);">● Fuera del rango</span>
-                                        @endif
+                                        <div>
+                                            @if ($tipo->estaDisponible())
+                                                <span class="chip chip--ok">● Dentro del rango</span>
+                                            @else
+                                                <span class="chip chip--neutro">● Fuera del rango</span>
+                                            @endif
+                                        </div>
                                     @else
-                                        <span style="color:var(--gray-400);">Sin límite de fechas</span>
+                                        <span class="kpi__hint">Sin límite de fechas</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if($tipo->requisitos->isEmpty())
-                                        <span style="color:var(--gray-400);">Sin requisitos</span>
+                                    @if ($tipo->requisitos->isEmpty())
+                                        <span class="kpi__hint">Sin requisitos</span>
                                     @else
                                         <div style="display:flex; flex-wrap:wrap; gap:4px;">
                                             @foreach ($tipo->requisitos as $req)
-                                                <span class="badge {{ $req->pivot->tsr_es_obligatorio ? 'badge--pendiente' : 'badge--aprobada' }}"
+                                                <span class="chip {{ $req->pivot->tsr_es_obligatorio ? 'chip--warn' : 'chip--ok' }}"
                                                       title="{{ $req->pivot->tsr_es_obligatorio ? 'Obligatorio' : 'Opcional' }}">
-                                                    {{ $req->req_nombre_requisito }}{{ $req->pivot->tsr_es_obligatorio ? ' *' : '' }}
+                                                    {{ $req->req_nombre_requisito }}
                                                 </span>
                                             @endforeach
                                         </div>
@@ -94,14 +81,18 @@
                                     <form action="{{ route('admin.tipos-solicitud.alternar-estado', $tipo->tsi_id) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
-                                        @if($tipo->tsi_estado_tipo === 'activo')
-                                            <button type="submit" class="btn btn--sm" style="background:#22a35a; color:white;">● Activo</button>
+                                        @if ($tipo->tsi_estado_tipo === 'activo')
+                                            <button type="submit" class="chip chip--ok"
+                                                    title="Pulsa para desactivar este trámite"
+                                                    style="border:none; cursor:pointer;">● Activo</button>
                                         @else
-                                            <button type="submit" class="btn btn--sm" style="background:var(--gray-200); color:var(--gray-700);">○ Inactivo</button>
+                                            <button type="submit" class="chip chip--neutro"
+                                                    title="Pulsa para activar este trámite"
+                                                    style="border:none; cursor:pointer;">○ Inactivo</button>
                                         @endif
                                     </form>
                                 </td>
-                                <td style="text-align:right; white-space:nowrap;">
+                                <td class="table__acciones">
                                     <div style="display:inline-flex; gap:6px; justify-content:flex-end;">
                                         <a href="{{ route('admin.tipos-solicitud.edit', $tipo->tsi_id) }}" class="btn btn--dark btn--sm">Editar</a>
                                         <form action="{{ route('admin.tipos-solicitud.destroy', $tipo->tsi_id) }}" method="POST"
@@ -119,5 +110,4 @@
             </div>
         @endif
     </div>
-</div>
 @endsection

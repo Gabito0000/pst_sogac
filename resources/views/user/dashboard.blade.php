@@ -1,83 +1,92 @@
 @extends('layouts.plantilla_user')
 
+@section('title', 'Mi Panel')
+
 @section('content')
-<main class="main">
-    <div class="container">
+    {{-- Alertas de éxito o error --}}
+    @if(session('success'))
+        <div class="alert alert--success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert--error">{{ session('error') }}</div>
+    @endif
 
-        {{-- Alertas de éxito o error --}}
-        @if(session('success'))
-            <div class="alert alert--success">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert--error">{{ session('error') }}</div>
-        @endif
-
-        {{-- Encabezado de Bienvenida (sin caja oscura, directo sobre el fondo) --}}
-        <section style="margin-bottom: 24px;">
-            <h1 style="font-size: 1.8rem; margin-bottom: 4px; color: var(--black);">Hola, {{ Auth::user()->usu_primer_nombre }}</h1>
-            <p style="color: var(--gray-700);">Gestiona tus solicitudes académicas de forma rápida y sencilla desde el menú superior.</p>
-        </section>
-
-        {{-- Tarjetas de Estadísticas --}}
-        <div class="stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
-            <div class="card" style="padding: 20px; text-align: center; margin-bottom: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md);">
-                <div class="stat__label" style="font-size: 0.85rem; color: var(--gray-700); text-transform: uppercase; font-weight: 600;">Total</div>
-                <div class="stat__value" style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['total'] }}</div>
-            </div>
-            <div class="card" style="padding: 20px; text-align: center; margin-bottom: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md);">
-                <div class="stat__label" style="font-size: 0.85rem; color: var(--gray-700); text-transform: uppercase; font-weight: 600;">Pendientes</div>
-                <div class="stat__value" style="font-size: 1.8rem; font-weight: 700; color: #d97706; margin-top: 4px;">{{ $stats['pendiente'] }}</div>
-            </div>
-            <div class="card" style="padding: 20px; text-align: center; margin-bottom: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md);">
-                <div class="stat__label" style="font-size: 0.85rem; color: var(--gray-700); text-transform: uppercase; font-weight: 600;">Aprobadas</div>
-                <div class="stat__value" style="font-size: 1.8rem; font-weight: 700; color: #15803d; margin-top: 4px;">{{ $stats['aprobada'] }}</div>
-            </div>
-            <div class="card" style="padding: 20px; text-align: center; margin-bottom: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md);">
-                <div class="stat__label" style="font-size: 0.85rem; color: var(--gray-700); text-transform: uppercase; font-weight: 600;">Rechazadas</div>
-                <div class="stat__value" style="font-size: 1.8rem; font-weight: 700; color: var(--red); margin-top: 4px;">{{ $stats['rechazada'] }}</div>
-            </div>
+    {{-- Encabezado de bienvenida: mismo bloque que usa el resto del sistema --}}
+    <div class="pagina-head">
+        <div>
+            <h1 class="pagina-head__titulo">Hola, {{ Auth::user()->usu_primer_nombre }}</h1>
+            <p class="pagina-head__desc">
+                Gestiona tus solicitudes académicas de forma rápida y sencilla desde el menú lateral.
+            </p>
         </div>
-
-        {{-- SECCIÓN PRINCIPAL: Solicitudes Pendientes Activas --}}
-        <div class="card" id="mis-solicitudes" style="margin-bottom: 32px; padding: 24px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md);">
-            <h2 class="card__title" style="font-size: 1.25rem; margin-bottom: 4px; color: var(--black);">Solicitudes Pendientes</h2>
-            <p class="card__sub" style="color: var(--gray-700); font-size: 0.95rem; margin-bottom: 20px;">Tus trámites actuales que se encuentran en proceso de revisión.</p>
-
-            @php
-                $pendientesList = $misSolicitudesRecientes->filter(function($s) {
-                    return strtolower($s->estadoActual->eso_nombre_estado) === 'pendiente';
-                });
-            @endphp
-
-            @if($pendientesList->isEmpty())
-                <p style="color: var(--gray-700); padding: 10px 0;">No tienes solicitudes pendientes en este momento.</p>
-            @else
-                <div class="table-wrap" style="overflow-x: auto;">
-                    <table class="table" style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--gray-200); text-align: left;">
-                                <th style="padding: 12px; font-size: 0.85rem; text-transform: uppercase; color: var(--gray-900);">Fecha</th>
-                                <th style="padding: 12px; font-size: 0.85rem; text-transform: uppercase; color: var(--gray-900);">Tipo</th>
-                                <th style="padding: 12px; font-size: 0.85rem; text-transform: uppercase; color: var(--gray-900);">Asunto</th>
-                                <th style="padding: 12px; font-size: 0.85rem; text-transform: uppercase; color: var(--gray-900);">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($pendientesList as $s)
-                                @php $estado = strtolower($s->estadoActual->eso_nombre_estado); @endphp
-                                <tr style="border-bottom: 1px solid var(--gray-200);">
-                                    <td style="padding: 14px 12px; font-size: 0.9rem; color: var(--gray-700);">{{ \Carbon\Carbon::parse($s->sol_fecha_creacion)->format('d/m/Y') }}</td>
-                                    <td style="padding: 14px 12px; font-weight: 500; color: var(--black);">{{ $s->tipoSolicitud->tsi_nombre_tipo }}</td>
-                                    <td style="padding: 14px 12px; max-width: 280px; color: var(--gray-700); font-size: 0.9rem;">{{ $s->sol_motivo_detallado ?? 'Sin motivo detallado' }}</td>
-                                    <td style="padding: 14px 12px;"><span class="badge badge--{{ $estado }}" style="text-transform: capitalize;">{{ $estado }}</span></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
+        <div class="pagina-head__acciones">
+            <a href="{{ route('user.tramites.index') }}" class="btn btn--primary">Iniciar un trámite</a>
         </div>
-
     </div>
-</main>
+
+    {{-- Tarjetas de resumen --}}
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="kpi__label">Total</div>
+            <div class="kpi__value">{{ $stats['total'] }}</div>
+        </div>
+        <div class="kpi kpi--pendiente">
+            <div class="kpi__label">Pendientes</div>
+            <div class="kpi__value">{{ $stats['pendiente'] }}</div>
+        </div>
+        <div class="kpi kpi--aprobada">
+            <div class="kpi__label">Aprobadas</div>
+            <div class="kpi__value">{{ $stats['aprobada'] }}</div>
+        </div>
+        <div class="kpi kpi--rechazada">
+            <div class="kpi__label">Rechazadas</div>
+            <div class="kpi__value">{{ $stats['rechazada'] }}</div>
+        </div>
+    </div>
+
+    {{-- Solicitudes pendientes --}}
+    @php
+        $pendientesList = $misSolicitudesRecientes->filter(function ($s) {
+            return strtolower($s->estadoActual->eso_nombre_estado) === 'pendiente';
+        });
+    @endphp
+
+    <div class="card">
+        <h2 class="card__title">Solicitudes pendientes</h2>
+        <p class="card__sub" style="margin-bottom: 20px;">
+            Tus trámites actuales que se encuentran en proceso de revisión.
+        </p>
+
+        @if($pendientesList->isEmpty())
+            <p class="estado-vacio">
+                No tienes solicitudes pendientes en este momento.
+                <br>
+                <a href="{{ route('user.tramites.index') }}">Revisa los trámites disponibles</a> para empezar.
+            </p>
+        @else
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Asunto</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pendientesList as $s)
+                            @php $estado = strtolower($s->estadoActual->eso_nombre_estado); @endphp
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($s->sol_fecha_creacion)->format('d/m/Y') }}</td>
+                                <td>{{ $s->tipoSolicitud->tsi_nombre_tipo }}</td>
+                                <td>{{ $s->sol_motivo_detallado ?? 'Sin motivo detallado' }}</td>
+                                <td><span class="badge badge--{{ $estado }}">{{ $estado }}</span></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
 @endsection

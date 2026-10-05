@@ -3,39 +3,48 @@
 @section('title', 'Panel de Administración')
 
 @section('content')
-<div class="container main">
-    <section class="hero" style="background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 6px solid var(--red); padding: 24px; border-radius: var(--radius); color: white; margin-bottom: 24px;">
-      <h1 style="font-size: 1.6rem; margin-bottom: 6px;">Panel de Control Administrativo</h1>
-      <p style="color: var(--gray-400); margin: 0;">Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
-    </section>
+@php
+    // La misma vista sirve para el panel de solicitudes y para la cola del
+    // taquillero: solo cambian los datos que recibe. El taquillero no tiene
+    // acceso a las tarjetas de estadísticas, asi que no se las pasamos.
+    $mostrarEstadisticas ??= true;
+    $urlBase ??= route('admin.dashboard');
+@endphp
+{{-- El contenedor y el padding los aporta el esqueleto, aqui va solo el contenido --}}
+<section class="hero">
+  <h1>Panel de Control Administrativo</h1>
+  <p>Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
+</section>
 
-    {{-- Manejo de mensajes de éxito enviados desde el Controlador --}}
-    @if(session('success'))
-        <div class="alert alert--success">{{ session('success') }}</div>
-    @endif
+{{-- Manejo de mensajes de éxito enviados desde el Controlador --}}
+@if(session('success'))
+    <div class="alert alert--success">{{ session('success') }}</div>
+@endif
 
-    <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
-      <a href="{{ route('admin.dashboard') }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--black); {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Total Solicitudes</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['total'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'pendiente']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid #d69a00; {{ request('estado') === 'pendiente' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Pendientes</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['pendiente'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'aprobada']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid #22a35a; {{ request('estado') === 'aprobada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Aprobadas</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['aprobada'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'rechazada']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--red); {{ request('estado') === 'rechazada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Rechazadas</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['rechazada'] }}</div>
-      </a>
-    </div>
+@if($mostrarEstadisticas)
+<div class="kpi-grid">
+  <a href="{{ route('admin.dashboard') }}" class="kpi" style="text-decoration:none; color:inherit; {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Total Solicitudes</div>
+    <div class="kpi__value">{{ $stats['total'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'pendiente']) }}" class="kpi kpi--pendiente" style="text-decoration:none; color:inherit; {{ request('estado') === 'pendiente' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Pendientes</div>
+    <div class="kpi__value">{{ $stats['pendiente'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'aprobada']) }}" class="kpi kpi--aprobada" style="text-decoration:none; color:inherit; {{ request('estado') === 'aprobada' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Aprobadas</div>
+    <div class="kpi__value">{{ $stats['aprobada'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'rechazada']) }}" class="kpi kpi--rechazada" style="text-decoration:none; color:inherit; {{ request('estado') === 'rechazada' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Rechazadas</div>
+    <div class="kpi__value">{{ $stats['rechazada'] }}</div>
+  </a>
+</div>
+@endif
 
-    <div class="card" style="background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-md);">
-      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;">Listado de Solicitudes Estudiantiles</h2>
-      <p style="color: var(--gray-700); font-size: 0.95rem; margin-bottom: 20px;">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
+<div class="card">
+  <h2 class="card__title">Listado de Solicitudes Estudiantiles</h2>
+  <p class="card__sub" style="margin-bottom: 20px;">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
 
       <style>
         .buscador-caja { position: relative; flex: 1; min-width: 240px; }
@@ -94,7 +103,7 @@
         .modal-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 10px; }
       </style>
 
-      <form method="GET" action="{{ route('admin.dashboard') }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
+      <form method="GET" action="{{ $urlBase }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
         <div class="buscador-caja">
           <i class="ti ti-search" aria-hidden="true"></i>
           <input
@@ -165,7 +174,7 @@
           const selectTipo = document.getElementById('tipo_solicitud');
           const wrapper = document.getElementById('resultados-wrapper');
           const tabs = document.querySelectorAll('.tab-estado');
-          const urlBase = "{{ route('admin.dashboard') }}";
+          const urlBase = "{{ $urlBase }}";
 
           let estadoActual = new URLSearchParams(window.location.search).get('estado') || '';
 
@@ -338,5 +347,4 @@
         })();
       </script>
     </div>
-</div>
 @endsection

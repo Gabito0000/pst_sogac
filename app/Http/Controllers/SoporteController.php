@@ -133,7 +133,7 @@ class SoporteController extends Controller
         // Bandejas separadas por rol: el admin prioriza los tickets sin
         // reclamar y el estudiante ve su consulta en curso. Antes vivía todo
         // en una sola vista que se bifurcaba con @if sobre el rol.
-        $vista = $usuario->usu_rol === 'admin' ? 'admin.chat.index' : 'ayuda.chat.index';
+        $vista = $usuario->esAdministrativo() ? 'admin.chat.index' : 'ayuda.chat.index';
 
         return view($vista, array_merge(['hilos' => $hilos], $estadoBandeja));
     }
@@ -142,7 +142,7 @@ class SoporteController extends Controller
     {
         $hilo = $this->soporteService->obtenerChatConMensajes($hch_id);
 
-        $esAdmin = Auth::user()->usu_rol === 'admin';
+        $esAdmin = Auth::user()->esAdministrativo();
 
         if (! $esAdmin && $hilo->hch_id_usuario !== Auth::id()) {
             abort(403, 'No tienes permiso para ver este chat.');

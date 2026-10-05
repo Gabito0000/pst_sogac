@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->increments('usu_id');
-            $table->enum('usu_rol', ['estudiante', 'admin']);
+            $table->enum('usu_rol', ['estudiante', 'administrador', 'analista', 'taquillero']);
             $table->unsignedInteger('usu_tdo_id');
             $table->string('usu_primer_nombre', 50);
             $table->string('usu_segundo_nombre', 50)->nullable();

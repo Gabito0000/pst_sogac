@@ -5,10 +5,13 @@ use App\Http\Controllers\AdminEstadisticasController;
 use App\Http\Controllers\AdminHistorialCambioController;
 use App\Http\Controllers\AdminPreguntaFrecuenteController;
 use App\Http\Controllers\AdminRequisitoController;
+use App\Http\Controllers\AdminSolicitudController;
 use App\Http\Controllers\AdminTipoSolicitudController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AyudaController;
 use App\Http\Controllers\HistorialSolicitudController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserSolicitudController;
@@ -25,6 +28,14 @@ Route::post('/login', [LoginController::class, 'procesarLogin'])->name('login.po
 
 Route::get('/register', [RegisterController::class, 'mostrarFormulario'])->name('register');
 Route::post('/register', [RegisterController::class, 'registrar'])->name('register.post');
+
+// Recuperacion de contrasena: pide el correo, envia el enlace y permite
+// escribir la nueva clave. Usa el broker de Laravel sobre la tabla
+// usuarios a traves del campo usu_correo_electronico.
+Route::get('/olvide-mi-contrasena', [PasswordResetController::class, 'requestForm'])->name('password.request');
+Route::post('/olvide-mi-contrasena', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+Route::get('/restablecer-contrasena/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
+Route::post('/restablecer-contrasena', [PasswordResetController::class, 'updatePassword'])->name('password.update');
 
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')->middleware('auth');
 
@@ -62,41 +73,73 @@ Route::middleware('auth')->prefix('user')->group(function () {
     });
 });
 
-// El prefijo admin exige rol 'admin' + usuario autenticado (middleware EsAdmin).
+// ============================================================
+// GRUPO ADMIN
+// 'admin' (middleware EsAdmin) exige sesión + que el usuario pertenezca
+// a la jerarquía administrativa: administrador, analista o taquillero.
+// Dentro, cada módulo se afina con 'rol' según la jerarquía
+// (definida en App\Models\Rol):
+//   administrador > analista > taquillero
+// ============================================================
 Route::middleware('admin')->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+
+    // ---- Solo el ADMINISTRADOR ----
 
     // Panel estadístico: métricas precisas de todo el proceso de las solicitudes.
-    Route::get('/estadisticas', [AdminEstadisticasController::class, 'index'])->name('admin.estadisticas');
-    Route::get('/estadisticas/exportar', [AdminEstadisticasController::class, 'exportar'])->name('admin.estadisticas.exportar');
+    Route::middleware('rol:administrador')->group(function () {
+        Route::get('/estadisticas', [AdminEstadisticasController::class, 'index'])->name('admin.estadisticas');
+        Route::get('/estadisticas/exportar', [AdminEstadisticasController::class, 'exportar'])->name('admin.estadisticas.exportar');
+    });
 
     // Bitácora de cambios: qué se tocó en el sistema, quién y con qué valores.
     // Es un sector aparte y no una pestaña del panel estadístico porque mide
     // cosas distintas: el panel resume los números del proceso de solicitudes y
     // la bitácora deja constancia de cada modificación, con su autor.
-    Route::prefix('cambios')->name('admin.cambios.')->group(function () {
+    Route::middleware('rol:administrador')->prefix('cambios')->name('admin.cambios.')->group(function () {
         Route::get('/', [AdminHistorialCambioController::class, 'index'])->name('index');
         Route::get('/exportar', [AdminHistorialCambioController::class, 'exportar'])->name('exportar');
     });
 
-    Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
+    // ---- Administrador y analista ----
 
-    Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
-        ->except(['show'])
-        ->names('admin.tipos-solicitud');
+    Route::middleware('rol:administrador,analista')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-    Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
-        ->name('admin.tipos-solicitud.alternar-estado');
+        Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
 
-    // Preguntas frecuentes: CRUD propio del administrador. Antes compartia una
-    // vista con el estudiante que se bifurcaba por rol, y create()/edit()
-    // apuntaban a vistas que no existen.
-    // Sin 'show': la pregunta se lee dentro del listado o del portal del
-    // estudiante, no en una pagina propia.
-    Route::resource('preguntas', AdminPreguntaFrecuenteController::class)
-        ->except(['show'])
-        ->names('admin.preguntas');
+        Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
+            ->except(['show'])
+            ->names('admin.tipos-solicitud');
+
+        Route::patch('/tipos-solicitud/{id}/alternar-estado', [AdminTipoSolicitudController::class, 'alternarEstado'])
+            ->name('admin.tipos-solicitud.alternar-estado');
+
+        // Preguntas frecuentes: CRUD propio del administrador. Antes compartia una
+        // vista con el estudiante que se bifurcaba por rol, y create()/edit()
+        // apuntaban a vistas que no existen.
+        // Sin 'show': la pregunta se lee dentro del listado o del portal del
+        // estudiante, no en una pagina propia.
+        Route::resource('preguntas', AdminPreguntaFrecuenteController::class)
+            ->except(['show'])
+            ->names('admin.preguntas');
+    });
+
+    // Gestión de usuarios: solo el administrador
+    Route::middleware('rol:administrador')->prefix('usuarios')->name('admin.usuarios.')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index'])->name('index');
+        Route::get('/buscar', [AdminUserController::class, 'search'])->name('search'); // AJAX
+        Route::post('/agregar', [AdminUserController::class, 'agregarPorCorreo'])->name('agregar');
+        Route::put('/{usuario}', [AdminUserController::class, 'update'])->name('update');
+        Route::post('/{usuario}/desbloquear', [AdminUserController::class, 'unlock'])->name('unlock');
+        Route::delete('/{usuario}', [AdminUserController::class, 'destroy'])->name('destroy');
+    });
+
+    // ---- Los tres roles administrativos ----
+
+    // Cola de solicitudes: procesar, aprobar y rechazar. Es la página de
+    // inicio del taquillero, que no puede abrir el panel estadístico.
+    Route::get('/solicitudes', [AdminSolicitudController::class, 'index'])->name('admin.solicitudes.index');
+    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
 
     // Chats de soporte. El middleware 'admin' ya exige sesion, asi que no hace
     // falta volver a anadir 'auth' aqui.

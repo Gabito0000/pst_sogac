@@ -31,8 +31,8 @@
         </div>
         <div class="auth-card__body">
           
-          <!-- Manejo de errores de Laravel -->
-          @error('email')
+<!-- Manejo de errores de Laravel -->
+          @error('identificador')
             <div class="alert alert--error">{{ $message }}</div>
           @enderror
 
@@ -40,14 +40,18 @@
             @csrf <!-- Token de seguridad obligatorio en Laravel -->
             
             <div class="field">
-              <label for="email">Correo electrónico</label>
-              <!-- Mantenemos el correo si hubo un error al escribir la clave -->
-              <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus />
+              <label for="identificador">Correo electrónico o número de documento</label>
+              <!-- Mantenemos el valor si hubo un error al escribir la clave -->
+              <input type="text" id="identificador" name="identificador" value="{{ old('identificador') }}" required autofocus />
             </div>
             
             <div class="field">
               <label for="password">Contraseña</label>
               <input type="password" id="password" name="password" required />
+            </div>
+
+            <div style="text-align:right;margin-top:-8px;">
+              <a href="{{ route('password.request') }}" style="font-size:0.9rem;">¿Olvidaste tu contraseña?</a>
             </div>
 
             <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--gray-700);cursor:pointer;">

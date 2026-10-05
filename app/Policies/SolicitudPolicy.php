@@ -16,7 +16,7 @@ class SolicitudPolicy
 {
     public function view(Usuario $usuario, Solicitud $solicitud): bool
     {
-        return $usuario->usu_rol === 'admin'
+        return $usuario->esAdministrativo()
             || (int) $solicitud->sol_usu_id === (int) $usuario->usu_id;
     }
 }

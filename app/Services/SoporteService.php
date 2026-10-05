@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Mail\NuevoMensajeSoporte;
 use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class SoporteService
 {
@@ -45,12 +47,23 @@ class SoporteService
             $rutaImagen = $archivoImagen->store('chats', 'public');
         }
 
-        return MensajeChat::create([
+        $mensaje = MensajeChat::create([
             'mch_id_hilo' => $hiloId,
             'mch_id_remitente' => $remitenteId,
             'mch_cuerpo' => $cuerpo,
             'mch_ruta_imagen' => $rutaImagen,
         ]);
+
+        // --- NUEVA LÓGICA DE CORREO ---
+        // Cargamos el hilo con los datos de su creador
+        $hilo = HiloChat::with('usuario')->find($hiloId);
+
+        // Si el que envía el mensaje NO es el dueño del ticket (es decir, es el admin)
+        if ($hilo && $hilo->hch_id_usuario !== $remitenteId) {
+            Mail::to($hilo->usuario->usu_correo_electronico)->send(new NuevoMensajeSoporte($hilo->hch_id));
+        }
+
+        return $mensaje;
     }
 
     public function reclamarChat($hiloId, $adminId)
@@ -119,7 +132,7 @@ class SoporteService
     {
         $query = HiloChat::where('hch_estado', 'cerrado')->orderBy('updated_at', 'desc');
 
-        if ($usuario->usu_rol === 'admin') {
+        if ($usuario->esAdministrativo()) {
             return $query->with(['usuario', 'admin'])->paginate($porPagina);
         }
 
@@ -136,7 +149,7 @@ class SoporteService
             'hiloActivo' => null,
         ];
 
-        if ($usuario->usu_rol === 'admin') {
+        if ($usuario->esAdministrativo()) {
             $estado['hilosPendientes'] = HiloChat::with('usuario')
                 ->where('hch_estado', 'pendiente')
                 ->orderBy('created_at', 'asc')

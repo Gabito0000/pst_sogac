@@ -129,7 +129,7 @@ test('un estudiante tampoco puede exportar las métricas', function () {
 
 test('un administrador accede al panel y encuentra el enlace en el header', function () {
     $catalogo = estadisticasCatalogo();
-    $admin = estadisticasUsuario('admin', 'V-99999999', $catalogo['documento']->tdo_id);
+    $admin = estadisticasUsuario('administrador', 'V-99999999', $catalogo['documento']->tdo_id);
 
     $estudiante = estadisticasUsuario('estudiante', 'V-11111113', $catalogo['documento']->tdo_id);
     estadisticasSolicitud($catalogo, $estudiante, 'pendiente');
@@ -144,7 +144,7 @@ test('un administrador accede al panel y encuentra el enlace en el header', func
 
 test('el administrador puede exportar las métricas a CSV', function () {
     $catalogo = estadisticasCatalogo();
-    $admin = estadisticasUsuario('admin', 'V-99999998', $catalogo['documento']->tdo_id);
+    $admin = estadisticasUsuario('administrador', 'V-99999998', $catalogo['documento']->tdo_id);
 
     $this->actingAs($admin)
         ->get(route('admin.estadisticas.exportar'))
@@ -281,7 +281,7 @@ test('la distribución por tipo de trámite suma el total del sistema', function
 
 test('el panel no rompe cuando el sistema no tiene solicitudes', function () {
     $catalogo = estadisticasCatalogo();
-    $admin = estadisticasUsuario('admin', 'V-99999997', $catalogo['documento']->tdo_id);
+    $admin = estadisticasUsuario('administrador', 'V-99999997', $catalogo['documento']->tdo_id);
 
     $servicio = app(SolicitudesEstadisticasService::class);
 

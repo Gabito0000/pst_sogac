@@ -1,0 +1,38 @@
+# Todo lo que se genera en el host y no debe entrar en la imagen.
+# La imagen instala sus propias dependencias y compila sus propios assets.
+
+.git
+.gitignore
+.github
+
+# Dependencias: se resuelven dentro de la imagen
+vendor/
+node_modules/
+
+# Assets compilados: se generan en la etapa de Node
+public/build/
+
+# Entorno local: cada quien tiene el suyo (y el suyo apunta a XAMPP)
+.env
+.env.*
+!.env.example
+
+# Cache de Laravel y archivos generados
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*.php
+
+# Datos locales: la base vive en el contenedor, no en la imagen
+database/*.sqlite
+
+# Herramientas de edicion y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scripts de verificacion temporal
+*.tmp
+*_check.php

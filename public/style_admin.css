@@ -209,6 +209,11 @@ a:hover { color: var(--red-dark); }
 .field input[type="email"],
 .field input[type="password"],
 .field input[type="tel"],
+/* date, number y search faltaban aqui: los formularios de tramites y
+   requisitos los usan y salian con el aspecto crudo del navegador. */
+.field input[type="date"],
+.field input[type="number"],
+.field input[type="search"],
 .field select,
 .field textarea {
   width: 100%;
@@ -504,6 +509,80 @@ a:hover { color: var(--red-dark); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Menu lateral en arbol: cada modulo es un boton que despliega sus funciones. */
+/* Los modulos y sus enlaces ocupan todo el ancho del panel: son una sola
+   columna vertical larga, no una rejilla. */
+.nav__modulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  flex: 0 0 auto;
+  margin: 12px 0 4px;
+  padding: 9px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+  text-align: left;
+  cursor: pointer;
+}
+.nav__modulo:first-of-type { margin-top: 4px; }
+.nav__modulo:hover { background: rgba(255, 255, 255, 0.12); }
+.nav__modulo.activo { color: var(--white); }
+.nav__chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.2s ease;
+}
+.nav__modulo[aria-expanded='true'] .nav__chevron { transform: rotate(180deg); }
+
+/* nowrap en los grupos por la misma razon que en .nav: en un contenedor en
+   columna, wrap reparte el excedente en columnas nuevas en vez de scrollear. */
+.nav__grupo {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+}
+.nav__grupo[hidden] { display: none; }
+
+.nav__item {
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
+  padding: 9px 10px 9px 20px;
+  border-radius: 8px;
+  color: var(--white);
+  text-decoration: none;
+  font-size: 0.92rem;
+  position: relative;
+}
+.nav__item::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transform: translateY(-50%);
+}
+.nav__item:hover { background: rgba(255, 255, 255, 0.14); }
+.nav__item.activa {
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+}
+.nav__item.activa::before { background: var(--white); }
+
 /* Acordeon de preguntas frecuentes (vista de solo lectura) */
 .faq { display: flex; flex-direction: column; gap: 10px; }
 
@@ -716,6 +795,26 @@ a:hover { color: var(--red-dark); }
 
 /* Admin: buscador, selector y pestanas de estado */
 .buscador-caja { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+/* Las casillas y los selectores de archivo no heredan el ancho completo:
+   sin esto se estiran al 100% o se ven con el aspecto del navegador. */
+.field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--red);
+}
+
+.field input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--gray-700);
+}
+
 .buscador-caja input[type="text"] { flex: 1; min-width: 240px; }
 .buscador-caja select { padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit; background: var(--white); color: var(--black); }
 .tabs-estado { display: inline-flex; gap: 4px; padding: 4px; background: var(--gray-100); border-radius: var(--radius-sm); flex-wrap: wrap; }

@@ -41,7 +41,7 @@ function chatEstudiante(string $documento = 'V-30000001'): Usuario
 
 function chatAdmin(string $documento = 'V-30000100'): Usuario
 {
-    return chatUsuario('admin', $documento);
+    return chatUsuario('administrador', $documento);
 }
 
 /**

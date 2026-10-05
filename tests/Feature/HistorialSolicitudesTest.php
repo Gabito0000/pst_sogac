@@ -183,7 +183,7 @@ test('sin solicitudes el historial invita a empezar', function () {
 
 test('la ficha muestra el recorrido y los cambios de la solicitud', function () {
     $catalogo = historialCatalogo();
-    $admin = historialUsuario('admin', 'V-10000001');
+    $admin = historialUsuario('administrador', 'V-10000001');
     $estudiante = historialUsuario();
 
     $solicitud = historialSolicitud($estudiante);

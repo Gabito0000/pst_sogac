@@ -17,7 +17,7 @@ uses(RefreshDatabase::class);
 /**
  * Crea un usuario con el catalogo de tipo de documento que exige usuarios.
  */
-function cambiosUsuario(string $rol = 'admin', string $documento = 'V-10000001'): Usuario
+function cambiosUsuario(string $rol = 'administrador', string $documento = 'V-10000001'): Usuario
 {
     $tipoDocumento = TipoDocumento::firstOrCreate(
         ['tdo_abreviatura' => 'V'],
@@ -278,7 +278,7 @@ test('el administrador ve la bitacora con sus filtros', function () {
 
 test('la bitacora filtra por autor y por rango de fechas', function () {
     $admin = cambiosUsuario();
-    $otro = cambiosUsuario('admin', 'V-10000002');
+    $otro = cambiosUsuario('administrador', 'V-10000002');
 
     $this->actingAs($admin);
     PreguntasFrecuentes::create(['pregunta' => 'Del primer admin', 'respuesta' => 'Sí']);
