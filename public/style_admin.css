@@ -561,7 +561,9 @@ a:hover { color: var(--red-dark); }
 .nav__grupo[hidden] { display: none; }
 
 .nav__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   flex: 0 0 auto;
   padding: 9px 10px 9px 20px;

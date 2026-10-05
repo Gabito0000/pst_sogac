@@ -93,24 +93,6 @@
         ],
         [
             'ambito' => 'admin',
-            'titulo' => 'Preguntas frecuentes',
-            'visible' => $esAdminOAnalista,
-            'funciones' => [
-                [
-                    'ruta' => 'admin.preguntas.index',
-                    'texto' => 'Listar preguntas',
-                    'patrones' => [
-                        'admin.preguntas.index',
-                        'admin.preguntas.edit',
-                        'admin.preguntas.update',
-                        'admin.preguntas.destroy',
-                    ],
-                ],
-                ['ruta' => 'admin.preguntas.create', 'texto' => 'Nueva pregunta', 'patrones' => ['admin.preguntas.create']],
-            ],
-        ],
-        [
-            'ambito' => 'admin',
             'titulo' => 'Estadísticas',
             'visible' => $usuario?->esAdministrador(),
             'funciones' => [
@@ -135,17 +117,37 @@
                 ['ruta' => 'admin.usuarios.index', 'texto' => 'Gestionar usuarios', 'patrones' => ['admin.usuarios.*']],
             ],
         ],
+        // Ayuda del administrador: las dos pantallas con las que se atiende al
+        // estudiante que escribe. Antes cada una era un modulo suelto (Preguntas
+        // frecuentes aqui y Chats al final de la lista), asi que quedaban
+        // separadas y habia que recordarlas: son la misma labor.
         [
             'ambito' => 'admin',
-            'titulo' => 'Chats',
+            'titulo' => 'Ayuda',
             'visible' => $usuario?->esAdministrativo(),
-            // El modulo tiene una sola funcion, asi que plegarlo era pedir un
-            // clic de mas: ahora el boton va directo a la bandeja de soporte.
-            'enlaceDirecto' => true,
-            'contador' => $pendientesChat,
-            'contadorTitulo' => 'consultas sin reclamar',
             'funciones' => [
-                ['ruta' => 'admin.chat.index', 'texto' => 'Bandeja de soporte', 'patrones' => ['admin.chat.index']],
+                [
+                    'ruta' => 'admin.preguntas.index',
+                    'texto' => 'Preguntas frecuentes',
+                    'patrones' => [
+                        'admin.preguntas.index',
+                        'admin.preguntas.edit',
+                        'admin.preguntas.update',
+                        'admin.preguntas.destroy',
+                    ],
+                ],
+                [
+                    'ruta' => 'admin.preguntas.create',
+                    'texto' => 'Nueva pregunta',
+                    'patrones' => ['admin.preguntas.create'],
+                ],
+                [
+                    'ruta' => 'admin.chat.index',
+                    'texto' => 'Chats',
+                    'patrones' => ['admin.chat.index'],
+                    'contador' => $pendientesChat,
+                    'contadorTitulo' => 'consultas sin reclamar',
+                ],
             ],
         ],
 
@@ -297,6 +299,13 @@
                    'activa' => request()->routeIs($funcion['patrones'] ?? [$funcion['ruta']]),
                ])>
                 {{ $funcion['texto'] }}
+
+                {{-- Una funcion tambien puede llevar su propio contador: en Ayuda
+                     el pendiente es el de los chats, no el de las preguntas. --}}
+                @if (($funcion['contador'] ?? 0) > 0)
+                    <span class="nav__contador"
+                          title="{{ $funcion['contadorTitulo'] ?? 'pendientes' }}">{{ $funcion['contador'] }}</span>
+                @endif
             </a>
         @endforeach
     </div>
