@@ -125,6 +125,9 @@
             'ambito' => 'admin',
             'titulo' => 'Chats',
             'visible' => $usuario?->esAdministrativo(),
+            // El modulo tiene una sola funcion, asi que plegarlo era pedir un
+            // clic de mas: ahora el boton va directo a la bandeja de soporte.
+            'enlaceDirecto' => true,
             'funciones' => [
                 ['ruta' => 'admin.chat.index', 'texto' => 'Bandeja de soporte', 'patrones' => ['admin.chat.index']],
             ],
@@ -198,8 +201,27 @@
 
 @foreach ($modulosVisibles as $modulo)
     @php
+        $principal = $modulo['funciones'][0];
+        $principalActiva = request()->routeIs($principal['patrones'] ?? [$principal['ruta']]);
+    @endphp
+
+    {{-- Modulo de una sola funcion: se dibuja como enlace directo. Plegarlo
+         obligaba a dos clics para llegar a la pantalla (uno para abrir el
+         modulo y otro para el enlace), y en pantallas bajas el titulo quedaba
+         fuera de vista. El enlace lleva a su unica funcion. --}}
+    @if ($modulo['enlaceDirecto'] ?? false)
+        <a href="{{ route($principal['ruta']) }}"
+           @class(['nav__item', 'nav__item--directo', 'activa' => $principalActiva])
+           @if ($principalActiva) aria-current="page" @endif>
+            {{ $modulo['titulo'] }}
+        </a>
+
+        @continue
+    @endif
+
+    @php
         // Un modulo aparece desplegado si alguna de sus funciones es la que se
-        // esta viendo; los demas arrancan plegados.
+        // esta viendo; los demos arrancan plegados.
         $moduloActivo = collect($modulo['funciones'])->contains(
             fn ($funcion) => request()->routeIs($funcion['patrones'] ?? [$funcion['ruta']])
         );
