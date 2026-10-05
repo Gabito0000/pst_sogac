@@ -1,50 +1,78 @@
-@extends('layouts.plantilla_login')
-@section('title', 'Crear Nueva Contraseña')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Establecer nueva contraseña</title>
+  <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
+</head>
+<body>
+  @include('partials.cabecera')
 
-@section('content')
-<div class="auth-card bg-white rounded-lg shadow-lg overflow-hidden">
-  <div class="auth-card__head p-6 border-b text-center">
-    <h1 class="text-2xl font-bold text-gray-800">Nueva Contraseña</h1>
-    <p class="text-sm text-gray-500 mt-2">Crea una nueva contraseña segura para tu cuenta.</p>
-  </div>
-  
-  <div class="auth-card__body p-6">
-    @error('email')
-      <div class="text-red-500 text-sm mb-2">{{ $message }}</div>
-    @enderror
-    @error('password')
-      <div class="text-red-500 text-sm mb-4">{{ $message }}</div>
-    @enderror
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="{{ route('portada') }}" class="brand" style="text-decoration:none;">
+        <span class="brand__mark">S</span>
+        <span class="brand__name">Solicítalo</span>
+      </a>
 
-    <form action="{{ route('password.update') }}" method="post" class="space-y-4">
-      @csrf
-      
-      <!-- Token oculto requerido por Laravel -->
-      <input type="hidden" name="token" value="{{ $token }}">
+      <a href="{{ route('login') }}" class="nav__sitio">
+        <i class="bi bi-house-door"></i> Ir al sitio
+      </a>
+    </div>
+  </header>
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-        <!-- Pre-llenamos el correo porque viene en la URL por seguridad -->
-        <input type="email" id="email" name="email" value="{{ request()->email ?? old('email') }}" required readonly 
-               class="mt-1 w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-500" />
+  <main class="main container">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="auth-card__head">
+          <h1>Nueva contraseña</h1>
+          <p>Solicítalo · Sistema de Solicitudes Estudiantiles</p>
+        </div>
+        <div class="auth-card__body">
+
+          @error('email')
+            <div class="alert alert--error">{{ $message }}</div>
+          @enderror
+
+          @error('password')
+            <div class="alert alert--error">{{ $message }}</div>
+          @enderror
+
+          <form action="{{ route('password.update') }}" method="post" class="form">
+            @csrf
+            <input type="hidden" name="token" value="{{ $token }}" />
+
+            <div class="field">
+              <label for="email">Correo electrónico</label>
+              <input type="email" id="email" name="email" value="{{ old('email', $email) }}" required />
+            </div>
+
+            <div class="field">
+              <label for="password">Nueva contraseña</label>
+              <input type="password" id="password" name="password" required />
+              <span class="field__hint">Mínimo 8 caracteres.</span>
+            </div>
+
+            <div class="field">
+              <label for="password_confirmation">Repite la contraseña</label>
+              <input type="password" id="password_confirmation" name="password_confirmation" required />
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--block">Guardar contraseña</button>
+          </form>
+        </div>
+        <div class="auth-card__foot">
+          <a href="{{ route('login') }}">Volver al inicio de sesión</a>
+        </div>
       </div>
+    </div>
+  </main>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
-        <input type="password" id="password" name="password" required autofocus 
-               class="mt-1 w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500" />
-      </div>
-
-      <div>
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-        <input type="password" id="password_confirmation" name="password_confirmation" required 
-               class="mt-1 w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500" />
-      </div>
-
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
-        Guardar y Entrar
-      </button>
-    </form>
-  </div>
-</div>
-@endsection
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -15,8 +15,7 @@ class UserSolicitudController extends Controller
 {
     /**
      * Panel del estudiante. Muestra únicamente los trámites que el admin
-     * dejó ACTIVOS y dentro de su ventana de fechas (mismo método
-     * estaDisponible() que ya usa el panel admin para el semáforo).
+     * dejó ACTIVOS y dentro de su ventana de fechas.
      */
     public function index()
     {
@@ -25,7 +24,7 @@ class UserSolicitudController extends Controller
             ->filter(fn ($t) => $t->estaDisponible())
             ->values();
 
-        // Solicitudes propias del estudiante logueado (para el resumen y la tabla de abajo)
+        // Solicitudes propias del estudiante logueado
         $misSolicitudesTodas = Solicitud::with(['tipoSolicitud', 'estadoActual'])
             ->where('sol_usu_id', Auth::id())
             ->get();
@@ -59,21 +58,7 @@ class UserSolicitudController extends Controller
     }
 
     /**
-     * Historial completo de solicitudes del estudiante.
-     */
-    public function historial()
-    {
-        $misSolicitudesRecientes = Solicitud::with(['tipoSolicitud', 'estadoActual'])
-            ->where('sol_usu_id', Auth::id())
-            ->orderByDesc('sol_fecha_creacion')
-            ->get();
-
-        return view('user.historial', compact('misSolicitudesRecientes'));
-    }
-
-    /**
-     * Calendario del estudiante: citas de validacion fisica asignadas
-     * a sus solicitudes (fecha, lugar y estado de cada una).
+     * Calendario del estudiante: citas de validación física asignadas.
      */
     public function misCitas()
     {
@@ -87,14 +72,11 @@ class UserSolicitudController extends Controller
 
     /**
      * Formulario para solicitar un trámite específico.
-     * Muestra dinámicamente los requisitos que el admin le asignó a ESE trámite.
      */
     public function create($id)
     {
         $tramite = TipoSolicitud::with('requisitos')->findOrFail($id);
 
-        // Doble candado: si alguien entra por URL directa a un trámite que
-        // ya se desactivó o venció, lo mandamos de vuelta con un aviso.
         if (! $tramite->estaDisponible()) {
             return redirect()->route('dashboard')->with('error', 'Este trámite ya no está disponible.');
         }
@@ -103,8 +85,7 @@ class UserSolicitudController extends Controller
     }
 
     /**
-     * Guarda la solicitud nueva del estudiante. Aparece automáticamente
-     * en el dashboard admin porque escribe en la misma tabla "solicitudes".
+     * Guarda la solicitud nueva del estudiante.
      */
     public function store(Request $request, $id)
     {
@@ -118,9 +99,6 @@ class UserSolicitudController extends Controller
             'motivo' => 'required|string|max:2000',
         ]);
 
-        // Toda solicitud queda "amarrada" a un lapso académico activo
-        // (semestre/periodo actual). Si nadie configuró uno, avisamos en
-        // vez de guardar una solicitud "huérfana".
         $lapso = LapsoAcademico::where('lac_estado_lapso', 'activo')->first();
         if (! $lapso) {
             return back()

@@ -25,3 +25,9 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Volcados de la base de datos: contienen correos y hashes de contrasena.
+# El archivo se queda en el disco para que Docker lo restaure al crear el
+# volumen, pero no se publica en el repositorio.
+/docker/postgres/*.sql
+*.sql.gz

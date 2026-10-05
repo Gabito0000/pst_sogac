@@ -18,31 +18,43 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_usu_rol_check');
+        $esPostgres = DB::getDriverName() === 'pgsql';
+
+        if ($esPostgres) {
+            DB::statement('ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_usu_rol_check');
+        }
 
         // El rol "admin" pasa a llamarse "administrador"
         DB::table('usuarios')
             ->where('usu_rol', 'admin')
             ->update(['usu_rol' => 'administrador']);
 
-        DB::statement(
-            'ALTER TABLE usuarios ADD CONSTRAINT usuarios_usu_rol_check '
-            ."CHECK (usu_rol IN ('estudiante', 'administrador', 'analista', 'taquillero'))"
-        );
+        if ($esPostgres) {
+            DB::statement(
+                'ALTER TABLE usuarios ADD CONSTRAINT usuarios_usu_rol_check '
+                ."CHECK (usu_rol IN ('estudiante', 'administrador', 'analista', 'taquillero'))"
+            );
+        }
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_usu_rol_check');
+        $esPostgres = DB::getDriverName() === 'pgsql';
 
-        // Volvemos aADMINISTRADOR -> admin; los roles nuevos pasan a admin
+        if ($esPostgres) {
+            DB::statement('ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_usu_rol_check');
+        }
+
+        // Volvemos a administrador -> admin; los roles nuevos pasan a admin
         DB::table('usuarios')
             ->whereIn('usu_rol', ['administrador', 'analista', 'taquillero'])
             ->update(['usu_rol' => 'admin']);
 
-        DB::statement(
-            'ALTER TABLE usuarios ADD CONSTRAINT usuarios_usu_rol_check '
-            ."CHECK (usu_rol IN ('estudiante', 'admin'))"
-        );
+        if ($esPostgres) {
+            DB::statement(
+                'ALTER TABLE usuarios ADD CONSTRAINT usuarios_usu_rol_check '
+                ."CHECK (usu_rol IN ('estudiante', 'admin'))"
+            );
+        }
     }
 };

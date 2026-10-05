@@ -2,77 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Usuario;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
+/**
+ * Recuperacion de contrasena para el modelo Usuario.
+ *
+ * El broker de Laravel se apoya en el metodo getEmailForPasswordReset() del
+ * modelo, que devuelve usu_correo_electronico, y guarda el token en la tabla
+ * password_reset_tokens.
+ */
 class PasswordResetController extends Controller
 {
-    // Muestra la vista pidiendo el correo
-    public function requestForm()
+    /** Muestra el formulario donde se pide el correo con la cuenta. */
+    public function requestForm(): View
     {
         return view('auth.forgot-password');
     }
 
-    // Envía el correo con el token
-    // Envía el correo con el token
-    public function sendResetLink(Request $request)
+    /**
+     * Genera el token y notifica al correo indicado.
+     *
+     * No revela si el correo existe o no: siempre responde con el mismo
+     * aviso para no filtrar que correos estan registrados.
+     */
+    public function sendResetLink(Request $request): RedirectResponse
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::broker()->sendResetLink([
-            'usu_correo_electronico' => $request->email
+        Password::broker()->sendResetLink([
+            'usu_correo_electronico' => $request->email,
         ]);
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return back()->with('status', '¡Te hemos enviado el enlace de recuperación por correo!');
-        }
-
-        return back()->withErrors(['email' => 'No encontramos un usuario con ese correo.']);
+        return back()->with(
+            'status',
+            'Si ese correo tiene una cuenta registrada, te enviamos el enlace para restablecer tu contraseña.'
+        );
     }
 
-    // Muestra el formulario para escribir la nueva clave
-    public function resetForm(Request $request, $token)
+    /** Muestra el formulario para escribir la nueva contraseña. */
+    public function resetForm(Request $request, string $token): View
     {
         return view('auth.reset-password', [
-            'token' => $token, 
-            'email' => $request->email
+            'token' => $token,
+            'email' => $request->query('email'),
         ]);
     }
-    
-    // Actualiza la contraseña
-    public function updatePassword(Request $request)
+
+    /** Guarda la nueva contraseña cuando el token sigue vigente. */
+    public function updatePassword(Request $request): RedirectResponse
     {
         $request->validate([
-            'token' => 'required',
+            'token' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // SOLUCIÓN: Hacemos el mismo mapeo aquí
-        $status = Password::broker()->reset(
+        $estado = Password::broker()->reset(
             [
                 'usu_correo_electronico' => $request->email,
-                'password'              => $request->password,
+                'password' => $request->password,
                 'password_confirmation' => $request->password_confirmation,
-                'token'                 => $request->token
+                'token' => $request->token,
             ],
-            function ($user, $password) {
-                // Laravel ejecuta esto si el token es válido
-                $user->usu_contrasena_hash = Hash::make($password);
-                $user->setRememberToken(Str::random(60));
-                $user->save();
+            function (Usuario $usuario, string $contrasena): void {
+                $usuario->usu_contrasena_hash = Hash::make($contrasena);
+                $usuario->setRememberToken(Str::random(60));
+                $usuario->save();
 
-                event(new PasswordReset($user));
+                event(new PasswordReset($usuario));
             }
         );
 
-        if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', 'Tu contraseña ha sido restablecida. Ya puedes iniciar sesión.');
+        if ($estado === Password::PASSWORD_RESET) {
+            return redirect()
+                ->route('login')
+                ->with('status', 'Tu contraseña ha sido restablecida. Ya puedes iniciar sesión.');
         }
 
-        return back()->withErrors(['email' => 'El token es inválido o ha expirado.']);
+        return back()->withErrors(['email' => 'El enlace es inválido o ya expiró.']);
     }
 }

@@ -35,7 +35,7 @@ class SoporteController extends Controller
                 $request->file('imagen')
             );
 
-            return redirect()->route('user.chat.mostrar', $nuevoHilo->hch_id);
+            return redirect()->route('user.ayuda.chat.mostrar', $nuevoHilo->hch_id);
 
         } catch (Exception $e) {
             if ($e->getCode() == 409) {
@@ -43,7 +43,7 @@ class SoporteController extends Controller
                     ->whereIn('hch_estado', ['pendiente', 'activo', 'pendiente_cierre'])
                     ->first();
 
-                return redirect()->route('user.chat.mostrar', $chatAbierto->hch_id)
+                return redirect()->route('user.ayuda.chat.mostrar', $chatAbierto->hch_id)
                     ->with('info', $e->getMessage());
             }
 
@@ -128,9 +128,14 @@ class SoporteController extends Controller
         $usuario = Auth::user();
 
         $hilos = $this->soporteService->obtenerHistorialPaginado($usuario);
-        $estadoDashboard = $this->soporteService->obtenerEstadoBandejaSoporte($usuario);
+        $estadoBandeja = $this->soporteService->obtenerEstadoBandejaSoporte($usuario);
 
-        return view('soporte.bandeja_entrada', array_merge(['hilos' => $hilos], $estadoDashboard));
+        // Bandejas separadas por rol: el admin prioriza los tickets sin
+        // reclamar y el estudiante ve su consulta en curso. Antes vivía todo
+        // en una sola vista que se bifurcaba con @if sobre el rol.
+        $vista = $usuario->esAdministrativo() ? 'admin.chat.index' : 'ayuda.chat.index';
+
+        return view($vista, array_merge(['hilos' => $hilos], $estadoBandeja));
     }
 
     public function mostrarChat($hch_id)
@@ -144,7 +149,7 @@ class SoporteController extends Controller
         }
 
         return $esAdmin
-            ? view('soporte.chat_admin', compact('hilo'))
-            : view('soporte.chat_usuario', compact('hilo'));
+            ? view('admin.chat.mostrar', compact('hilo'))
+            : view('ayuda.chat.mostrar', compact('hilo'));
     }
 }

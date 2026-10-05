@@ -64,6 +64,27 @@ class Usuario extends Authenticatable
         return $this->hasMany(HistorialEstadoSolicitud::class, 'hes_usu_id_responsable', 'usu_id');
     }
 
+    /**
+     * Nombre y apellidos en un solo valor.
+     *
+     * Las cuatro columnas de nombre estan separadas en la tabla porque cada
+     * parte se usa por separado (buscar por primer nombre, ordenar por
+     * apellido), asi que para mostrarlas juntas hay que unirlas en algun lado.
+     * Si estan vacias se cae al correo, que es el dato con el que siempre se
+     * puede identificar a una persona.
+     */
+    public function getNombreCompletoAttribute(): string
+    {
+        $nombre = collect([
+            $this->usu_primer_nombre,
+            $this->usu_segundo_nombre,
+            $this->usu_primer_apellido,
+            $this->usu_segundo_apellido,
+        ])->filter()->implode(' ');
+
+        return $nombre !== '' ? $nombre : (string) $this->usu_correo_electronico;
+    }
+
     // ¡CRUCIAL! Le decimos a Laravel qué columna guarda la contraseña encriptada
     public function getAuthPassword()
     {

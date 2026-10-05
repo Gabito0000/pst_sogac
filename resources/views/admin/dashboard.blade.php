@@ -1,55 +1,51 @@
-@extends('layouts.plantilla_general')
+@extends('layouts.plantilla_admin')
 
 @section('title', 'Panel de Administración')
 
 @section('content')
 @php
-    // La misma vista sirve para el panel estadístico y para la cola de
-    // solicitudes del taquillero: solo cambian los datos que recibe.
-    // El taquillero no tiene acceso a las tarjetas de estadísticas.
+    // La misma vista sirve para el panel de solicitudes y para la cola del
+    // taquillero: solo cambian los datos que recibe. El taquillero no tiene
+    // acceso a las tarjetas de estadísticas, asi que no se las pasamos.
     $mostrarEstadisticas ??= true;
     $urlBase ??= route('admin.dashboard');
 @endphp
-<div class="container main">
-    <section class="hero" style="background: linear-gradient(135deg, #111 0%, #222 100%); border-left: 6px solid var(--red); padding: 24px; border-radius: var(--radius); color: white; margin-bottom: 24px;">
-      <h1 style="font-size: 1.6rem; margin-bottom: 6px;">Panel de Control Administrativo</h1>
-      <p style="color: var(--gray-400); margin: 0;">Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
-    </section>
+{{-- El contenedor y el padding los aporta el esqueleto, aqui va solo el contenido --}}
+<section class="hero">
+  <h1>Panel de Control Administrativo</h1>
+  <p>Revisa la documentación adjunta, aprueba o rechaza los trámites académicos en tiempo real.</p>
+</section>
 
-    {{-- Manejo de mensajes de éxito enviados desde el Controlador --}}
-    @if(session('success'))
-        <div class="alert alert--success">{{ session('success') }}</div>
-    @endif
+{{-- Manejo de mensajes de éxito enviados desde el Controlador --}}
+@if(session('success'))
+    <div class="alert alert--success">{{ session('success') }}</div>
+@endif
 
-    @if($mostrarEstadisticas)
-    <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
-      {{-- Cada tarjeta es un link que filtra directamente por ese estado. El "Total" limpia el filtro de estado. --}}
-      <a href="{{ route('admin.dashboard') }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--black); {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Total Solicitudes</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['total'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'pendiente']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid #d69a00; {{ request('estado') === 'pendiente' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Pendientes</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['pendiente'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'aprobada']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid #22a35a; {{ request('estado') === 'aprobada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Aprobadas</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['aprobada'] }}</div>
-      </a>
-      <a href="{{ route('admin.dashboard', ['estado' => 'rechazada']) }}" class="card" style="text-decoration:none; color:inherit; padding: 20px; border-left: 5px solid var(--red); {{ request('estado') === 'rechazada' ? 'outline: 2px solid var(--red);' : '' }}">
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--gray-400); font-weight: 600;">Rechazadas</div>
-        <div style="font-size: 1.8rem; font-weight: 700; color: var(--black); margin-top: 4px;">{{ $stats['rechazada'] }}</div>
-      </a>
-    </div>
-    @endif
+@if($mostrarEstadisticas)
+<div class="kpi-grid">
+  <a href="{{ route('admin.dashboard') }}" class="kpi" style="text-decoration:none; color:inherit; {{ !request('estado') ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Total Solicitudes</div>
+    <div class="kpi__value">{{ $stats['total'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'pendiente']) }}" class="kpi kpi--pendiente" style="text-decoration:none; color:inherit; {{ request('estado') === 'pendiente' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Pendientes</div>
+    <div class="kpi__value">{{ $stats['pendiente'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'aprobada']) }}" class="kpi kpi--aprobada" style="text-decoration:none; color:inherit; {{ request('estado') === 'aprobada' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Aprobadas</div>
+    <div class="kpi__value">{{ $stats['aprobada'] }}</div>
+  </a>
+  <a href="{{ route('admin.dashboard', ['estado' => 'rechazada']) }}" class="kpi kpi--rechazada" style="text-decoration:none; color:inherit; {{ request('estado') === 'rechazada' ? 'outline: 2px solid var(--red);' : '' }}">
+    <div class="kpi__label">Rechazadas</div>
+    <div class="kpi__value">{{ $stats['rechazada'] }}</div>
+  </a>
+</div>
+@endif
 
-    <div class="card" style="background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-md);">
-      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;">Listado de Solicitudes Estudiantiles</h2>
-      <p style="color: var(--gray-700); font-size: 0.95rem; margin-bottom: 20px;">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
+<div class="card">
+  <h2 class="card__title">Listado de Solicitudes Estudiantiles</h2>
+  <p class="card__sub" style="margin-bottom: 20px;">Administra las peticiones ingresadas al sistema por los estudiantes.</p>
 
-      {{-- Estilos propios de esta barra: tabs tipo píldora y badges con punto de color,
-           inspirados en paneles tipo Stripe/Vercel. Se quedan aquí (no en style_admin.css)
-           para no afectar otras páginas del proyecto. --}}
       <style>
         .buscador-caja { position: relative; flex: 1; min-width: 240px; }
         .buscador-caja input {
@@ -84,7 +80,6 @@
         }
         #tipo_solicitud:focus { border-color: var(--red); outline: none; }
 
-        /* Modal de detalle con barra de color arriba según el estado */
         .modal-overlay {
           position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
           display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -108,10 +103,6 @@
         .modal-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 10px; }
       </style>
 
-      {{-- Barra de búsqueda. Ya NO se envía como formulario tradicional:
-           el JS de más abajo intercepta cada acción (escribir, cambiar el select,
-           hacer clic en una pestaña o en la paginación) y pide los datos con fetch(),
-           sin recargar la página. --}}
       <form method="GET" action="{{ $urlBase }}" id="form-busqueda" style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;" onsubmit="return false;">
         <div class="buscador-caja">
           <i class="ti ti-search" aria-hidden="true"></i>
@@ -148,8 +139,7 @@
         </div>
       </form>
 
-      {{-- Modal de detalle. Vive FUERA de #resultados-wrapper para que no se borre
-           cada vez que se reemplaza la tabla al buscar/filtrar. --}}
+      {{-- Modal de detalle --}}
       <div id="modal-detalle" class="modal-overlay" style="display:none;">
         <div class="modal-caja">
           <div id="modal-barra" class="modal-barra"></div>
@@ -174,7 +164,6 @@
         </div>
       </div>
 
-      {{-- Este div es lo único que se reemplaza cuando se busca/filtra/pagina --}}
       <div id="resultados-wrapper">
         @include('admin.partials.resultados')
       </div>
@@ -187,17 +176,14 @@
           const tabs = document.querySelectorAll('.tab-estado');
           const urlBase = "{{ $urlBase }}";
 
-          // Estado actual de los filtros (arranca con lo que ya viene en la URL)
           let estadoActual = new URLSearchParams(window.location.search).get('estado') || '';
 
-          // Pide al servidor solo el pedazo de la tabla (fetch = "pedido en segundo plano",
-          // no navega a otra página, por eso no hay recarga ni parpadeo).
           function buscar(url) {
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
               .then(function (respuesta) { return respuesta.text(); })
               .then(function (html) {
                 wrapper.innerHTML = html;
-                history.pushState(null, '', url); // Actualiza la URL sin recargar
+                history.pushState(null, '', url);
               });
           }
 
@@ -210,7 +196,6 @@
             buscar(urlBase + (query ? '?' + query : ''));
           }
 
-          // Búsqueda en vivo: espera 400ms después de que el usuario deja de escribir
           let temporizador;
           inputBusqueda.addEventListener('input', function () {
             clearTimeout(temporizador);
@@ -229,8 +214,6 @@
             });
           });
 
-          // Los links de paginación se recrean cada vez que se reemplaza el HTML,
-          // así que "escuchamos" los clics en el contenedor padre (delegación de eventos)
           wrapper.addEventListener('click', function (e) {
             const link = e.target.closest('a.pagina-link');
             if (link) {
@@ -247,7 +230,6 @@
             }
           });
 
-          // --- Modal de detalle, con Anterior/Siguiente entre las solicitudes de la página actual ---
           const modal = document.getElementById('modal-detalle');
           const modalBarra = document.getElementById('modal-barra');
           const modalTitulo = document.getElementById('modal-titulo');
@@ -310,7 +292,6 @@
             modal.style.display = 'none';
           }
 
-          // Aprueba/rechaza SIN recargar la página ni cerrar el modal.
           function resolverDesdeModal(url, nuevoEstado) {
             const botonesAccion = modalAcciones.querySelectorAll('button');
             botonesAccion.forEach(function (b) { b.disabled = true; b.style.opacity = '0.6'; });
@@ -318,11 +299,8 @@
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
               .then(function (respuesta) { return respuesta.json(); })
               .then(function () {
-                // Actualiza el data-estado del botón "Detalle"
                 listaActual[indiceActual].dataset.estado = nuevoEstado;
-                // Repinta el modal
                 pintarModal();
-                // Actualiza también la fila visualmente
                 actualizarFilaEnTabla(listaActual[indiceActual]);
               })
               .catch(function () {
@@ -331,7 +309,6 @@
               });
           }
 
-          // Actualiza el badge de estado y la columna de Acciones en la fila
           function actualizarFilaEnTabla(botonDetalle) {
             const fila = botonDetalle.closest('tr');
             if (!fila) return;
@@ -348,11 +325,8 @@
             if (celdaAcciones) {
               const aprobar = celdaAcciones.querySelector('a[style*="22a35a"]');
               const rechazar = celdaAcciones.querySelector('a[style*="var(--red)"]');
-              const rechazarViejo = celdaAcciones.querySelector('a.btn--danger');
-              
               if (aprobar) aprobar.remove();
               if (rechazar) rechazar.remove();
-              if (rechazarViejo) rechazarViejo.remove();
             }
           }
 
@@ -373,5 +347,4 @@
         })();
       </script>
     </div>
-</div>
 @endsection

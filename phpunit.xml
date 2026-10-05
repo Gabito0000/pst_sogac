@@ -23,8 +23,15 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_DATABASE" value="testing"/>
-        <env name="DB_URL" value=""/>
+        <!--
+            La app corre sobre PostgreSQL, pero los tests van contra una base
+            SQLite en memoria: no hay que crear ni resetear ninguna base a mano y
+            cada test arranca limpio. El servicio de estadisticas resuelve las
+            diferencias de SQL por motor (ver expresionTruncado()), asi que las
+            consultas se ejercitan igual en los dos.
+        -->
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

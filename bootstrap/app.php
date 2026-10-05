@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EsAdmin;
 use App\Http\Middleware\VerificarRol;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,8 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Middleware de jerarquia de roles: ->middleware('rol:administrador,analista')
         $middleware->alias([
+            // Acceso a cualquier rol administrativo (administrador, analista, taquillero)
+            'admin' => EsAdmin::class,
+            // Acceso a un rol concreto de la jerarquia: rol:administrador,analista
             'rol' => VerificarRol::class,
         ]);
     })

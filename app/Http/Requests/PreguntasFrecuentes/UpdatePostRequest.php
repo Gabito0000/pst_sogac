@@ -2,18 +2,11 @@
 
 namespace App\Http\Requests\PreguntasFrecuentes;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\PreguntasFrecuentes\CreatePostRequest;
-
-class UpdatePostRequest extends FormRequest
+class UpdatePostRequest extends CreatePostRequest
 {
-    public function authorize(): bool
-    {
-        return true; 
-    }
-
-    public function rules(): array
-    {
-        return (new CreatePostRequest())->rules();
-    }
+    /*
+     * Las reglas y los mensajes se heredan de CreatePostRequest: validar un
+     * alta y una edición con el mismo criterio evita que ambos formularios
+     * se desincronicen.
+     */
 }

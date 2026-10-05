@@ -1,8 +1,17 @@
-{{-- Vista de paginación simple, usando las mismas clases .btn que ya existen en style_admin.css --}}
+{{--
+    Vista de paginación simple, usando las mismas clases .btn que ya existen en style_admin.css.
+
+    La etiqueta del listado es un parámetro porque la reutilizan varios
+    listados: antes decía siempre "solicitudes", así que una lista de
+    preguntas frecuentes anunciaba "de 10 solicitudes".
+
+    Uso: {{ $paginador->links('vendor.pagination.custom', ['etiqueta' => 'preguntas']) }}
+--}}
 @if ($paginator->hasPages())
     <nav style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <span style="font-size: 0.85rem; color: var(--gray-700);">
-            Mostrando {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }} de {{ $paginator->total() }} solicitudes
+            Mostrando {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }} de
+            {{ $paginator->total() }} {{ $etiqueta ?? 'resultados' }}
         </span>
 
         <div style="display: flex; gap: 6px;">

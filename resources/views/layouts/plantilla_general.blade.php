@@ -72,10 +72,10 @@
         <span class="brand__mark">S</span>
         <span class="brand__name">Solicítalo 
           
-          <!-- RECUERDA: Ajustar la columna del ROL aquí -->
+          <!-- Muestra el rol solo cuando el usuario es del personal administrativo -->
           @auth
-            @if(Auth::user()->usu_rol == 'admin')
-              <span style="font-size: 0.8rem; background: var(--red, #dc2626); padding: 2px 8px; border-radius: 4px; color: white;">ADMIN</span>
+            @if(Auth::user()->esAdministrativo())
+              <span style="font-size: 0.8rem; background: var(--red, #dc2626); padding: 2px 8px; border-radius: 4px; color: white;">{{ strtoupper(Auth::user()->usu_rol) }}</span>
             @endif
           @endauth
 
@@ -110,25 +110,29 @@
         @if($usuario->esEstudiante())
           <!-- ==================== ESTUDIANTE ==================== -->
           <a href="{{ route('dashboard') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Inicio</a>
-          <a href="{{ route('dashboard') }}#mis-solicitudes" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Mis Solicitudes</a>
           <a href="{{ route('user.citas') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Calendario</a>
-          <a href="{{ route('soporte.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Ayuda</a>
+          <a href="{{ route('user.ayuda.preguntas') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Ayuda</a>
+          <a href="{{ route('user.ayuda.chat.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Chat de Soporte</a>
 
         @else
           {{-- ============ PERSONAL ADMINISTRATIVO ============ --}}
           {{-- Cada enlace se muestra solo si el rol lo permite --}}
 
-          @if($usuario->esAdministrador() || $usuario->esAnalista())
-            <a href="{{ route('admin.dashboard') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Panel Estadístico</a>
-            <a href="{{ route('admin.tipos-solicitud.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestionar Trámites</a>
-            <a href="{{ route('admin.requisitos.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Catálogo de Requisitos</a>
-          @endif
-
-          {{-- Solicitudes: los tres roles --}}
+          {{-- Solicitudes: los tres roles. Es la pantalla de trabajo del taquillero. --}}
           <a href="{{ route('admin.solicitudes.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Solicitudes</a>
           <a href="{{ route('admin.chat.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Bandeja de Soporte</a>
 
+          @if($usuario->esAdministrador() || $usuario->esAnalista())
+            <a href="{{ route('admin.dashboard') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestión de Solicitudes</a>
+            <a href="{{ route('admin.tipos-solicitud.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestionar Trámites</a>
+            <a href="{{ route('admin.requisitos.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Catálogo de Requisitos</a>
+            <a href="{{ route('admin.preguntas.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Preguntas Frecuentes</a>
+          @endif
+
           @if($usuario->esAdministrador())
+            {{-- El panel estadístico y la bitácora son solo del administrador --}}
+            <a href="{{ route('admin.estadisticas') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Estadísticas</a>
+            <a href="{{ route('admin.cambios.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Bitácora de Cambios</a>
             <a href="{{ route('admin.usuarios.index') }}" class="px-4 py-3 rounded-md hover:bg-gray-800 hover:text-blue-400 transition-colors">Gestión de Usuarios</a>
           @endif
         @endif

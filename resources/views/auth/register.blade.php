@@ -1,7 +1,29 @@
-@extends('layouts.plantilla_login')
-@section('title', 'Registro de Cuenta — Solicítalo')
-@section('ancho-tarjeta', 'max-w-2xl')
-@section('content')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Cuenta | Solicítalo</title>
+  <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+  @include('partials.cabecera')
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="{{ route('portada') }}" class="brand" style="text-decoration:none;">
+        <span class="brand__mark">S</span>
+        <span class="brand__name">Solicítalo</span>
+      </a>
+
+      <a href="{{ route('portada') }}" class="nav__sitio">
+        <i class="bi bi-house-door"></i> Ir al sitio
+      </a>
+    </div>
+  </header>
+  
+  <main class="main container">
     <div class="auth-wrap auth-wrap--wide">
       <div class="auth-card">
         <div class="auth-card__head">
@@ -15,7 +37,7 @@
           @if ($errors->any())
             <div class="alert alert--error" role="alert">
               <strong>Por favor, corrige los errores en el formulario:</strong>
-              <ul style="margin:0; padding-left:1.5rem;">
+              <ul>
                 @foreach ($errors->all() as $error)
                   <li>{{ $error }}</li>
                 @endforeach
@@ -62,19 +84,9 @@
                 <div class="field field--combo @error('cedula') field--invalid @enderror">
                   <label for="cedula">Cédula de Identidad</label>
                   <div class="input-group">
-                    {{-- Select Dinámico traído desde la Base de Datos --}}
                     <select name="nacionalidad" id="nacionalidad" class="input-select--short" aria-label="Nacionalidad">
-                      @if(isset($tiposDocumentos) && $tiposDocumentos->count() > 0)
-                          @foreach($tiposDocumentos as $tipo)
-                              <option value="{{ $tipo->tdo_abreviatura }}" {{ old('nacionalidad', 'V') == $tipo->tdo_abreviatura ? 'selected' : '' }}>
-                                  {{ $tipo->tdo_abreviatura }}-
-                              </option>
-                          @endforeach
-                      @else
-                          {{-- Respaldo en caso de que la tabla esté vacía --}}
-                          <option value="V" {{ old('nacionalidad', 'V') == 'V' ? 'selected' : '' }}>V-</option>
-                          <option value="E" {{ old('nacionalidad') == 'E' ? 'selected' : '' }}>E-</option>
-                      @endif
+                      <option value="V" {{ old('nacionalidad', 'V') == 'V' ? 'selected' : '' }}>V-</option>
+                      <option value="E" {{ old('nacionalidad') == 'E' ? 'selected' : '' }}>E-</option>
                     </select>
                     <input type="text" id="cedula" name="cedula" value="{{ old('cedula') }}" pattern="[0-9]{6,8}" maxlength="8" inputmode="numeric" required />
                   </div>
@@ -163,4 +175,13 @@
         </div>
       </div>
     </div>
-@endsection
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; {{ date('Y') }} Sistema de Solicitudes Estudiantiles — UPTP "Juan de Jesús Montilla"</p>
+    </div>
+  </footer>
+</body>
+</html>
+```[cite: 1]

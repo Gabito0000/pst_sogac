@@ -1,81 +1,86 @@
-@extends('layouts.plantilla_general')
+@extends('layouts.plantilla_admin')
 
-@section('title', 'Editar Requisito')
+@section('title', 'Editar requisito')
 
 @section('content')
-<div class="container main">
-    @if($errors->any())
-        <div class="alert alert--error">
-            <ul style="margin:0; padding-left:20px;">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    <nav class="miga" aria-label="Ruta de navegación">
+        <a href="{{ route('admin.requisitos.index') }}" class="miga__actual">Requisitos</a>
+        <span class="miga__sep" aria-hidden="true">/</span>
+        <span class="miga__actual" aria-current="page">Editar requisito</span>
+    </nav>
+
+    <div class="pagina-head">
+        <div>
+            <h1 class="pagina-head__titulo">Editar requisito</h1>
+            <p class="pagina-head__desc">Modifica los datos del requisito y sus asignaciones a trámites.</p>
         </div>
-    @endif
-
-    <div class="card">
-        <h2 class="card__title">Editar Requisito</h2>
-        <p class="card__sub">Modifica los datos del requisito y sus asignaciones a trámites.</p>
-
-        <form action="{{ route('admin.requisitos.update', $requisito->req_id) }}" method="POST" class="form">
-            @csrf
-            @method('PUT')
-
-            <div class="field">
-                <label for="req_nombre_requisito">Nombre del Requisito</label>
-                <input type="text" name="req_nombre_requisito" id="req_nombre_requisito"
-                       placeholder="Ej: Planilla de solicitud firmada"
-                       value="{{ old('req_nombre_requisito', $requisito->req_nombre_requisito) }}" required />
-            </div>
-
-            <div class="field">
-                <label for="req_descripcion">Descripción</label>
-                <textarea name="req_descripcion" id="req_descripcion"
-                          placeholder="Detalle del requisito (opcional)">{{ old('req_descripcion', $requisito->req_descripcion) }}</textarea>
-            </div>
-
-            <div class="field">
-                <label for="req_formato_esperado">Formato esperado</label>
-                <input type="text" name="req_formato_esperado" id="req_formato_esperado"
-                       placeholder="Ej: PDF, Mín. 150dpi, Copia legible"
-                       value="{{ old('req_formato_esperado', $requisito->req_formato_esperado) }}" />
-            </div>
-
-            <div style="margin-top:8px;">
-                <label style="font-size:0.85rem; font-weight:600; color:var(--gray-900); text-transform:uppercase; letter-spacing:0.5px;">
-                    Asignar a trámites
-                </label>
-                <p style="color:var(--gray-700); font-size:0.88rem; margin-bottom:12px;">
-                    Marca en qué tipos de solicitud se pedirá este documento. Marca la casilla "Obligatorio" si es indispensable.
-                </p>
-
-                @if($tiposSolicitud->isEmpty())
-                    <p style="color:var(--gray-400);">No hay tipos de trámite registrados aún.</p>
-                @else
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;">
-                        @foreach ($tiposSolicitud as $tipo)
-                            @php $estaAsignado = in_array((string)$tipo->tsi_id, $asignados, true); @endphp
-                            <label style="display:flex; gap:10px; align-items:center; padding:12px 14px; border:1.5px solid var(--gray-200); border-radius:var(--radius-sm); cursor:pointer;">
-                                <input type="checkbox" name="tipos[{{ $tipo->tsi_id }}]" value="1"
-                                       {{ $estaAsignado ? 'checked' : '' }} />
-                                <span style="flex:1; font-size:0.92rem;">{{ $tipo->tsi_nombre_tipo }}</span>
-                                <span style="display:flex; gap:6px; align-items:center; font-size:0.8rem; color:var(--gray-700);">
-                                    <input type="checkbox" name="obligatorios[{{ $tipo->tsi_id }}]" value="1"
-                                           {{ $estaAsignado && in_array((string)$tipo->tsi_id, $obligatorios, true) ? 'checked' : '' }} />
-                                    Obligatorio
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="btn btn--primary">Guardar Cambios</button>
-                <a href="{{ route('admin.requisitos.index') }}" class="btn btn--dark">Cancelar</a>
-            </div>
-        </form>
     </div>
-</div>
+
+    <form action="{{ route('admin.requisitos.update', $requisito->req_id) }}" method="POST" class="card">
+        @csrf
+        @method('PUT')
+
+        <div class="field">
+            <label for="req_nombre_requisito">Nombre del requisito</label>
+            <input type="text" name="req_nombre_requisito" id="req_nombre_requisito"
+                   placeholder="Ej: Planilla de solicitud firmada"
+                   value="{{ old('req_nombre_requisito', $requisito->req_nombre_requisito) }}" required />
+        </div>
+
+        <div class="field">
+            <label for="req_descripcion">Descripción</label>
+            <textarea name="req_descripcion" id="req_descripcion"
+                      placeholder="Detalle del requisito (opcional)">{{ old('req_descripcion', $requisito->req_descripcion) }}</textarea>
+        </div>
+
+        <div class="field">
+            <label for="req_formato_esperado">Formato esperado</label>
+            <input type="text" name="req_formato_esperado" id="req_formato_esperado"
+                   placeholder="Ej: PDF, Mín. 150dpi, Copia legible"
+                   value="{{ old('req_formato_esperado', $requisito->req_formato_esperado) }}" />
+        </div>
+
+        <fieldset class="form__section">
+            <legend class="panel__title">Asignar a trámites</legend>
+            <p class="field__hint" style="margin-bottom: 14px;">
+                Marca en qué tipos de solicitud se pedirá este documento. Activa
+                <strong>Obligatorio</strong> cuando sea indispensable.
+            </p>
+
+            @if ($tiposSolicitud->isEmpty())
+                <p class="estado-vacio">No hay tipos de trámite registrados aún.</p>
+            @else
+                {{-- Cada fila es una tarjeta con sus propias casillas: antes el
+                     checkbox de "Obligatorio" estaba dentro del <label> del otro
+                     y al pulsaba se activaban las dos casillas a la vez. --}}
+                <div class="panel-grid">
+                    @foreach ($tiposSolicitud as $tipo)
+                        @php $estaAsignado = in_array((string) $tipo->tsi_id, $asignados, true); @endphp
+                        <div class="panel">
+                            <label class="field--checkbox" for="tipo_{{ $tipo->tsi_id }}"
+                                   style="display:flex; gap:10px; align-items:center; cursor:pointer;">
+                                <input type="checkbox" name="tipos[{{ $tipo->tsi_id }}]" value="1"
+                                       id="tipo_{{ $tipo->tsi_id }}"
+                                       {{ $estaAsignado ? 'checked' : '' }} />
+                                <strong style="font-size:0.92rem;">{{ $tipo->tsi_nombre_tipo }}</strong>
+                            </label>
+
+                            <label class="field--checkbox" for="obligatorio_{{ $tipo->tsi_id }}"
+                                   style="display:flex; gap:8px; align-items:center; margin-top: 10px; cursor:pointer;">
+                                <input type="checkbox" name="obligatorios[{{ $tipo->tsi_id }}]" value="1"
+                                       id="obligatorio_{{ $tipo->tsi_id }}"
+                                       {{ $estaAsignado && in_array((string) $tipo->tsi_id, $obligatorios, true) ? 'checked' : '' }} />
+                                Obligatorio
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </fieldset>
+
+        <div class="actions">
+            <button type="submit" class="btn btn--primary">Guardar cambios</button>
+            <a href="{{ route('admin.requisitos.index') }}" class="btn btn--ghost">Cancelar</a>
+        </div>
+    </form>
 @endsection

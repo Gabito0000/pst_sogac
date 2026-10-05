@@ -1,0 +1,412 @@
+﻿:root {
+    --uptp-red: #c8102e;
+    --uptp-red-dark: #8b0a1f;
+    --uptp-red-soft: #ffe5ea;
+    --uptp-dark: #1a1a1a;
+    --uptp-gray: #f5f5f5;
+}
+
+.bg-uptp-red { background-color: var(--uptp-red) !important; }
+
+[data-bs-theme="dark"] {
+    --uptp-red: #ff3d57;
+    --uptp-red-dark: #c8102e;
+    --uptp-red-soft: #2a1014;
+    --uptp-dark: #000000;
+}
+
+body {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding-top: 0;
+    scroll-behavior: smooth;
+}
+
+.bg-uptp-dark   { background-color: var(--uptp-dark) !important; }
+.text-uptp-red  { color: var(--uptp-red) !important; }
+.border-uptp-red { border-color: var(--uptp-red) !important; }
+
+.btn-uptp-red {
+    background-color: var(--uptp-red);
+    border: 2px solid var(--uptp-red);
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-uptp-red:hover,
+.btn-uptp-red:focus {
+    background-color: var(--uptp-red-dark);
+    border-color: var(--uptp-red-dark);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(200,16,46,0.35);
+}
+
+/* Boton blanco: es el color que mas destaca sobre la barra roja, asi que se
+   reserva para la accion principal de la pagina (entrar al sistema). El
+   boton "Portal" conserva btn-uptp-red, que es rojo sobre rojo y apenas se
+   distingue de la barra. */
+.btn-blanco {
+    background-color: #ffffff;
+    border: 2px solid #ffffff;
+    color: var(--uptp-red);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-blanco:hover,
+.btn-blanco:focus {
+    background-color: var(--uptp-red-soft);
+    border-color: var(--uptp-red);
+    color: var(--uptp-red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.navbar .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s;
+}
+.navbar .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 0;
+    height: 2px;
+    background-color: var(--uptp-red);
+    transition: all 0.3s ease;
+}
+.navbar .nav-link:hover::after {
+    width: 80%;
+    left: 10%;
+}
+.navbar .nav-link:hover {
+    color: var(--uptp-red) !important;
+}
+
+.titulo-seccion {
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 12px;
+}
+.titulo-seccion::after {
+    content: "";
+    display: block;
+    width: 70px;
+    height: 4px;
+    background-color: var(--uptp-red);
+    margin: 12px auto 0;
+    border-radius: 2px;
+}
+
+.carrusel-slide {
+    height: 80vh;
+    min-height: 450px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.carrusel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(200,16,46,0.45) 100%);
+}
+.slide-1 { background-image: url('IMG1.jpg'); }
+.slide-2 { background-image: url('IMG2.jpg'); }
+.slide-3 { background-image: url('IMG3.png'); }
+.carousel-caption {
+    z-index: 2;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.carousel-indicators [data-bs-target] {
+    background-color: var(--uptp-red);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: var(--uptp-red);
+    border-radius: 50%;
+    padding: 22px;
+    background-size: 50% 50%;
+}
+
+.card-uptp {
+    border: none;
+    border-top: 4px solid var(--uptp-red);
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-uptp:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--uptp-red-soft);
+    color: var(--uptp-red-dark);
+}
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(200,16,46,0.25);
+}
+
+@media (max-width: 768px) {
+    .carrusel-slide { height: 60vh; }
+    .carousel-caption h1 { font-size: 1.8rem; }
+    .carousel-caption p  { font-size: 1rem; }
+}
+
+.card-interactiva {
+    background-color: transparent;
+    perspective: 1000px;
+    height: 240px !important;
+    position: relative;
+    border: none !important;
+}
+.card-frontal, .card-trasera {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px;
+    border-top: 4px solid var(--uptp-red);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card-frontal {
+    background-color: var(--bs-body-bg);
+}
+.card-trasera {
+    background-color: var(--uptp-dark);
+    transform: rotateY(180deg);
+}
+.card-interactiva:hover .card-frontal,
+.card-interactiva.touched .card-frontal {
+    transform: rotateY(180deg);
+}
+.card-interactiva:hover .card-trasera,
+.card-interactiva.touched .card-trasera {
+    transform: rotateY(360deg);
+}
+
+.bloque-historia {
+    border-left: 5px solid var(--bs-border-color);
+    transition: transform 0.3s ease, border-left-color 0.3s ease, box-shadow 0.3s ease;
+}
+.bloque-historia:hover {
+    transform: translateX(4px);
+    border-left-color: var(--uptp-red);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05) !important;
+}
+
+.card-interactiva-carrera {
+    background-color: transparent;
+    perspective: 1200px;
+    height: 330px !important;
+    position: relative;
+    border: none !important;
+}
+.card-interactiva-carrera .card-frontal,
+.card-interactiva-carrera .card-trasera {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    border-top: 4px solid var(--uptp-red);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+.card-interactiva-carrera .card-frontal {
+    background-color: var(--bs-body-bg);
+}
+.card-interactiva-carrera .card-trasera {
+    background-color: var(--uptp-dark);
+    transform: rotateY(180deg);
+}
+.card-interactiva-carrera:hover .card-frontal,
+.card-interactiva-carrera.touched .card-frontal {
+    transform: rotateY(180deg);
+}
+.card-interactiva-carrera:hover .card-trasera,
+.card-interactiva-carrera.touched .card-trasera {
+    transform: rotateY(360deg);
+}
+
+.x-small {
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+.xx-small {
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+.text-light-muted {
+    color: #e2e8f0;
+}
+@keyframes pulseGlow {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+.animate-pulse {
+    animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+.card-servicio-premium {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color-translucent) !important;
+    border-radius: 16px;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                border-color 0.4s ease;
+}
+.card-servicio-premium .icon-contenedor {
+    width: 56px;
+    height: 56px;
+    background-color: var(--uptp-red-soft);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.card-servicio-premium:hover {
+    transform: translateY(-6px);
+    border-color: var(--uptp-red) !important;
+    box-shadow: 0 12px 25px rgba(200, 16, 46, 0.06) !important;
+}
+.card-servicio-premium:hover .icon-contenedor {
+    transform: scale(1.05);
+    background-color: var(--uptp-red);
+}
+.card-servicio-premium:hover .icon-contenedor i {
+    color: #ffffff !important;
+}
+.tracking-wider {
+    letter-spacing: 0.08em;
+}
+[data-bs-theme="dark"] .card-servicio-premium:hover {
+    box-shadow: 0 12px 25px rgba(255, 61, 87, 0.12) !important;
+}
+
+.card-filosofia {
+    background-color: var(--bs-body-bg);
+    border-top: 4px solid var(--bs-secondary-border-subtle) !important;
+    border-radius: 14px;
+    transition: transform 0.3s ease, border-top-color 0.3s ease, box-shadow 0.3s ease;
+}
+.card-filosofia .icon-filosofia {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.card-filosofia:hover {
+    transform: translateY(-4px);
+    border-top-color: var(--uptp-red) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05) !important;
+}
+.card-filosofia:hover .icon-filosofia {
+    background-color: var(--uptp-red) !important;
+    color: #ffffff !important;
+}
+
+footer {
+    background-color: var(--uptp-dark);
+    color: #ffffff;
+}
+.footer-top {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+.footer-logo img {
+    margin-bottom: 1rem;
+}
+.footer-logo p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+.social-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+.social-links a:hover {
+    background-color: var(--uptp-red);
+    transform: translateY(-3px);
+}
+.footer-column h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+    color: var(--uptp-red);
+    font-weight: 600;
+}
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer-column ul li {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: #ddd;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.footer-column ul li i {
+    color: var(--uptp-red);
+    margin-top: 0.2rem;
+    min-width: 1.25rem;
+}
+.footer-column ul li a {
+    color: #ddd;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.footer-column ul li a:hover {
+    color: var(--uptp-red);
+}
+.footer-bottom {
+    padding: 1.5rem 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+.footer-bottom p {
+    margin-bottom: 0.5rem;
+}
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .social-links {
+        justify-content: center;
+    }
+    .footer-column ul li {
+        justify-content: center;
+    }
+}

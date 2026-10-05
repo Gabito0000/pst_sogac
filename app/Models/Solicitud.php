@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraCambios;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Solicitud extends Model
 {
+    use RegistraCambios;
+
     protected $table = 'solicitudes';
 
     protected $primaryKey = 'sol_id';
@@ -24,6 +28,18 @@ class Solicitud extends Model
         'sol_fecha_ultima_actualizacion',
         'sol_fecha_resolucion',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'sol_fecha_creacion' => 'datetime',
+            'sol_fecha_ultima_actualizacion' => 'datetime',
+            'sol_fecha_resolucion' => 'datetime',
+        ];
+    }
 
     // Relaciones hacia arriba (Pertenece a...)
     public function usuario()
@@ -61,5 +77,15 @@ class Solicitud extends Model
     public function cita()
     {
         return $this->hasOne(Cita::class, 'cit_sol_id', 'sol_id');
+    }
+
+    /**
+     * Bitacora de cambios de esta solicitud: altas, ediciones y cambios de
+     * estado. La genera el trait RegistraCambios, asi que aqui solo se declara
+     * el enlace para poder leerla.
+     */
+    public function cambios(): HasMany
+    {
+        return $this->hasMany(HistorialCambio::class, 'hcm_sol_id', 'sol_id');
     }
 }
