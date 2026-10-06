@@ -77,6 +77,7 @@
                 <div style="font-size: 0.95rem; font-weight: 600; margin-top: 2px;">
                     @if($primerResponsable)
                         {{ $primerResponsable->nombre_completo }}
+                        <span style="font-weight: 400; color: var(--gray-500);">({{ $primerResponsable->rol_etiqueta }})</span>
                     @else
                         <span style="color: var(--gray-400);">—</span>
                     @endif
@@ -134,7 +135,7 @@
                             @endif
                         </div>
                         <div style="font-size: 0.82rem; color: var(--gray-600); margin-top: 2px;">
-                            Por: {{ $h->responsable->nombre_completo ?? 'Sistema' }}
+                            Por: {{ $h->responsable->nombre_completo ?? 'Sistema' }}@if($h->responsable) <span style="color: var(--gray-400);">({{ $h->responsable->rol_etiqueta }})</span>@endif
                         </div>
                         @if($h->hes_observaciones_comentarios)
                             <div style="margin-top: 8px; padding: 10px 12px; background: var(--red-soft); border-radius: var(--radius-sm); border-left: 3px solid var(--red); font-size: 0.82rem;">
@@ -155,10 +156,17 @@
                         <li style="background: var(--gray-100); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px;">
                             <i class="bi bi-file-earmark" style="font-size: 1.4rem; color: var(--red);"></i>
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $doc->doc_nombre_archivo }}</div>
-                                <div style="font-size: 0.75rem; color: var(--gray-500);">{{ $doc->doc_tipo_mime }} · {{ number_format($doc->doc_tamano / 1024, 1) }} KB</div>
+                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $doc->doc_nombre_original_archivo }}</div>
+                                <div style="font-size: 0.75rem; color: var(--gray-500);">
+                                    {{ strtoupper((string) $doc->doc_formato_archivo) }}
+                                    @if($doc->doc_tamano_bytes)
+                                        · {{ number_format($doc->doc_tamano_bytes / 1024, 1) }} KB
+                                    @endif
+                                    @if($doc->doc_estado_validacion)
+                                        · <span style="text-transform: capitalize;">{{ $doc->doc_estado_validacion }}</span>
+                                    @endif
+                                </div>
                             </div>
-                            <a href="{{ route('admin.documentos.descargar', $doc) }}" class="btn btn--sm" style="background: var(--red); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem;">Descargar</a>
                         </li>
                     @endforeach
                 </ul>
@@ -170,10 +178,9 @@
             <div style="margin-bottom: 24px; padding: 16px; background: #e8f5e9; border-radius: var(--radius); border-left: 4px solid #22a35a;">
                 <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #14683a;">Cita de validación asignada</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 0.88rem;">
-                    <div><strong>Fecha:</strong> {{ $solicitud->cita->cit_fecha->format('d/m/Y') }}</div>
-                    <div><strong>Hora:</strong> {{ $solicitud->cita->cit_hora_inicio->format('H:i') }} - {{ $solicitud->cita->cit_hora_fin->format('H:i') }}</div>
-                    <div><strong>Lugar:</strong> {{ $solicitud->cita->cit_lugar }}</div>
-                    <div><strong>Estado:</strong> <span style="text-transform: capitalize;">{{ $solicitud->cita->estadoCita->eco_nombre_estado }}</span></div>
+                    <div><strong>Fecha y hora:</strong> {{ $solicitud->cita->cit_fecha_hora->format('d/m/Y H:i') }}</div>
+                    <div><strong>Lugar:</strong> {{ $solicitud->cita->cit_lugar ?? '—' }}</div>
+                    <div><strong>Estado:</strong> <span style="text-transform: capitalize;">{{ $solicitud->cita->cit_estado }}</span></div>
                 </div>
             </div>
         @endif

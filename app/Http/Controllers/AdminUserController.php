@@ -73,7 +73,14 @@ class AdminUserController extends Controller
             );
         }
 
-        $this->evitarDegradarUltimoAdministrador($usuario, $datos['rol']);
+        try {
+            $this->evitarDegradarUltimoAdministrador($usuario, $datos['rol']);
+        } catch (RuntimeException $e) {
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
+        }
 
         $usuario->update(['usu_rol' => $datos['rol']]);
 
@@ -96,7 +103,14 @@ class AdminUserController extends Controller
             'usu_rol' => 'required|in:'.implode(',', Rol::todos()),
         ]);
 
-        $this->evitarDegradarUltimoAdministrador($usuario, $request->input('usu_rol'));
+        try {
+            $this->evitarDegradarUltimoAdministrador($usuario, $request->input('usu_rol'));
+        } catch (RuntimeException $e) {
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
+        }
 
         $usuario->update($request->only([
             'usu_primer_nombre', 'usu_segundo_nombre', 'usu_primer_apellido',
@@ -122,8 +136,10 @@ class AdminUserController extends Controller
     {
         $usuario = Usuario::findOrFail($id);
 
-        // No dejar el sistema sin ningún administrador.
-        if ($usuario->esAdministrador() && $this->otrosAdministradores() === 0) {
+        // No dejar el sistema sin ningún administrador. Hay que excluir al
+        // propio usuario del conteo: si no, el que se intenta borrar se cuenta
+        // a sí mismo y el "único administrador" nunca da 0.
+        if ($usuario->esAdministrador() && $this->otrosAdministradores($usuario->usu_id) === 0) {
             return back()->with('error', 'No puedes eliminar al único administrador del sistema.');
         }
 

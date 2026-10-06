@@ -42,7 +42,18 @@
             'visible' => $usuario?->esAdministrativo(),
             'funciones' => [
                 ['ruta' => 'admin.solicitudes.index', 'texto' => 'Cola de solicitudes', 'patrones' => ['admin.solicitudes.*']],
-                ['ruta' => 'admin.dashboard', 'texto' => 'Todas las solicitudes', 'patrones' => ['admin.dashboard'], 'visible' => $esAdminOAnalista],
+                ['ruta' => 'admin.dashboard', 'texto' => 'Todas las solicitudes', 'patrones' => ['admin.dashboard'], 'soloSinEstado' => true, 'visible' => $esAdminOAnalista],
+                // Filtro rápido: abre el panel con la pestaña "Pendientes" ya
+                // activa. El estado se pasa por la URL (?estado=pendiente) y el
+                // botón queda resaltado solo cuando ese filtro está puesto,
+                // para no confundirlo con "Todas las solicitudes".
+                [
+                    'ruta' => 'admin.dashboard',
+                    'query' => ['estado' => 'pendiente'],
+                    'texto' => 'Solicitudes pendientes',
+                    'patrones' => ['admin.dashboard'],
+                    'visible' => $esAdminOAnalista,
+                ],
                 [
                     'ruta' => 'admin.tratadas.index',
                     'texto' => 'Solicitudes tratadas',
@@ -230,12 +241,52 @@
             $modulosVisibles[] = $modulo;
         }
     }
+
+    /**
+     * URL de una funcion del menu, incluyendo sus parametros de query.
+     *
+     * @param  array{ruta: string, query?: array<string, string>}  $funcion
+     */
+    $urlFuncion = fn (array $funcion): string => route(
+        $funcion['ruta'],
+        $funcion['query'] ?? []
+    );
+
+    /**
+     * Una funcion esta activa si la ruta coincide y, cuando declara query
+     * (p. ej. "Solicitudes pendientes" => ?estado=pendiente), ese filtro
+     * tambien esta puesto. Con 'soloSinEstado' es al reves: "Todas las
+     * solicitudes" solo se resalta cuando NO hay filtro de estado.
+     *
+     * @param  array{ruta: string, patrones?: array<int, string>, query?: array<string, string>, soloSinEstado?: bool}  $funcion
+     */
+    $funcionActiva = function (array $funcion): bool {
+        $coincideRuta = request()->routeIs($funcion['patrones'] ?? [$funcion['ruta']]);
+
+        if (! $coincideRuta) {
+            return false;
+        }
+
+        $estadoEnUrl = (string) request('estado', '');
+
+        if (($funcion['soloSinEstado'] ?? false) === true) {
+            return $estadoEnUrl === '';
+        }
+
+        foreach (($funcion['query'] ?? []) as $clave => $valor) {
+            if ((string) request($clave, '') !== (string) $valor) {
+                return false;
+            }
+        }
+
+        return true;
+    };
 @endphp
 
 @foreach ($modulosVisibles as $modulo)
     @php
         $principal = $modulo['funciones'][0];
-        $principalActiva = request()->routeIs($principal['patrones'] ?? [$principal['ruta']]);
+        $principalActiva = $funcionActiva($principal);
     @endphp
 
     {{-- Modulo de una sola funcion: se dibuja como enlace directo. Plegarlo
@@ -248,7 +299,7 @@
          chat). --}}
     @if ($modulo['enlaceDirecto'] ?? false)
         <div class="nav__fila">
-            <a href="{{ route($principal['ruta']) }}"
+            <a href="{{ $urlFuncion($principal) }}"
                @class(['nav__item', 'activa' => $principalActiva])
                @if ($principalActiva) aria-current="page" @endif>
                 {{ $modulo['titulo'] }}
@@ -273,7 +324,7 @@
         // Un modulo aparece desplegado si alguna de sus funciones es la que se
         // esta viendo; los demos arrancan plegados.
         $moduloActivo = collect($modulo['funciones'])->contains(
-            fn ($funcion) => request()->routeIs($funcion['patrones'] ?? [$funcion['ruta']])
+            fn ($funcion) => $funcionActiva($funcion)
         );
         $panelId = 'modulo-'.$loop->index;
     @endphp
@@ -293,10 +344,10 @@
 
     <div class="nav__grupo" id="{{ $panelId }}" data-modulo-panel @if (! $moduloActivo) hidden @endif>
         @foreach ($modulo['funciones'] as $funcion)
-            <a href="{{ route($funcion['ruta']) }}"
+            <a href="{{ $urlFuncion($funcion) }}"
                @class([
                    'nav__item',
-                   'activa' => request()->routeIs($funcion['patrones'] ?? [$funcion['ruta']]),
+                   'activa' => $funcionActiva($funcion),
                ])>
                 {{ $funcion['texto'] }}
 

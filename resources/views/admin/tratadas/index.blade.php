@@ -133,6 +133,7 @@
                             <td style="padding: 12px 16px;">
                                 @if($s->historialEstados->last()?->responsable)
                                     {{ $s->historialEstados->last()->responsable->nombre_completo }}
+                                    <br><small style="color: var(--gray-500);">{{ $s->historialEstados->last()->responsable->rol_etiqueta }}</small>
                                 @else
                                     <span style="color: var(--gray-400);">—</span>
                                 @endif
