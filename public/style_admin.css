@@ -493,6 +493,12 @@ a:hover { color: var(--red-dark); }
 .modal-overlay[data-abierto='1'] { display: flex; }
 
 .modal {
+  /* display:block es imprescindible: el CSS de Bootstrap (que se sigue
+     importando en resources/js/app.js) define ".modal { display: none }" y, al
+     no competir con esta regla, ese display se colaba. Se veía el fondo gris
+     del overlay pero no la caja del diálogo: al pulsar "Nueva consulta" la
+     pantalla quedaba a oscuras y sin forma de cerrar el formulario. */
+  display: block;
   background: var(--white);
   border-radius: var(--radius);
   padding: 28px;
@@ -555,7 +561,9 @@ a:hover { color: var(--red-dark); }
 .nav__grupo[hidden] { display: none; }
 
 .nav__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   flex: 0 0 auto;
   padding: 9px 10px 9px 20px;
@@ -577,6 +585,58 @@ a:hover { color: var(--red-dark); }
   transform: translateY(-50%);
 }
 .nav__item:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* Entrada directa del menu: el enlace principal y, a su lado, el acceso
+   rapido a la pantalla relacionada (de preguntas frecuentes al chat). Es una
+   sola fila para que el conjunto se lea como una opcion del menu y no como
+   dos. */
+.nav__fila {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  flex: 0 0 auto;
+}
+.nav__fila > .nav__item {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav__extra {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav__extra:hover { background: rgba(255, 255, 255, 0.14); color: var(--white); }
+
+/* Contador de pendientes: en blanco sobre el rojo de la barra, para que se
+   lea de un vistazo. */
+.nav__contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--red);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
 .nav__item.activa {
   background: rgba(255, 255, 255, 0.2);
   font-weight: 700;

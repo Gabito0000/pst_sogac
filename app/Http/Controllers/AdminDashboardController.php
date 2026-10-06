@@ -96,17 +96,29 @@ class AdminDashboardController extends Controller
         $nombreEstado = ($accion === 'aprobar') ? 'aprobada' : 'rechazada';
         $estadoNuevo = EstadoSolicitud::where('eso_nombre_estado', $nombreEstado)->firstOrFail();
 
+        // La observacion es opcional en el formulario, pero es lo unico que
+        // explica el cambio: es lo que el estudiante lee despues en su
+        // historial. Antes se descartaba al resolver.
+        $observacion = trim((string) $request->input('observacion', ''));
+
         // Bonus: Guardar el historial antes de cambiarlo (Opcional pero recomendado para tu sistema)
         HistorialEstadoSolicitud::create([
             'hes_sol_id' => $solicitud->sol_id,
-            'hes_usu_id_responsable' => auth()->user()->usu_id ?? 1, // ID del admin autenticado
+            // Antes caia a un usu_id=1 fijo si no habia sesion: en una bitacora
+            // eso es atribucion falsa. La ruta exige middleware 'admin', asi que
+            // auth()->id() siempre existe aqui.
+            'hes_usu_id_responsable' => auth()->id(),
             'hes_eso_id_anterior' => $solicitud->sol_eso_id,
             'hes_eso_id_nuevo' => $estadoNuevo->eso_id,
+            'hes_observaciones_comentarios' => $observacion !== '' ? $observacion : null,
         ]);
 
         // 2. Actualizamos la solicitud con el nuevo ID de estado
         $solicitud->update([
             'sol_eso_id' => $estadoNuevo->eso_id,
+            // Al resolver queda sellada la fecha: sin ella el historial no sabe
+            // cuando se atendio cada tramite.
+            'sol_fecha_resolucion' => $solicitud->sol_fecha_resolucion ?? now(),
         ]);
 
         $mensaje = ($accion === 'aprobar')
@@ -120,6 +132,7 @@ class AdminDashboardController extends Controller
             return response()->json([
                 'estado' => $nombreEstado,
                 'mensaje' => $mensaje,
+                'observacion' => $observacion,
             ]);
         }
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminPreguntaFrecuenteController;
 use App\Http\Controllers\AdminRequisitoController;
 use App\Http\Controllers\AdminSolicitudController;
 use App\Http\Controllers\AdminTipoSolicitudController;
+use App\Http\Controllers\AdminTratadasController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AyudaController;
 use App\Http\Controllers\HistorialSolicitudController;
@@ -105,6 +106,15 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     Route::middleware('rol:administrador,analista')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
+        // Solicitudes tratadas: todo lo que ya se movió de estado (aprobadas,
+        // rechazadas y las que pasaron por algún cambio). La bandeja de entrada
+        // solo muestra pendientes sin resolver, así que este listado es su
+        // complemento: dónde quedó cada trámite ya tocado.
+        Route::prefix('tratadas')->name('admin.tratadas.')->group(function () {
+            Route::get('/', [AdminTratadasController::class, 'index'])->name('index');
+            Route::get('/{solicitud}', [AdminTratadasController::class, 'show'])->name('show');
+        });
+
         Route::resource('requisitos', AdminRequisitoController::class)->names('admin.requisitos');
 
         Route::resource('tipos-solicitud', AdminTipoSolicitudController::class)
@@ -139,7 +149,20 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // Cola de solicitudes: procesar, aprobar y rechazar. Es la página de
     // inicio del taquillero, que no puede abrir el panel estadístico.
     Route::get('/solicitudes', [AdminSolicitudController::class, 'index'])->name('admin.solicitudes.index');
-    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])->name('admin.dashboard.estado');
+
+    // Resolver una solicitud. El POST es el camino real: lleva token CSRF y es lo
+    // único que permite mandar la observación (un GET la metería en la URL y la
+    // truncaría). El GET se conserva como alias para los enlaces que ya había,
+    // pero en ambos la acción va restringida a aprobar|rechazar: sin esa
+    // restricción, cualquier texto distinto de "aprobar" caía callado en la
+    // rama del rechazo.
+    Route::post('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])
+        ->where('accion', 'aprobar|rechazar')
+        ->name('admin.dashboard.estado.store');
+
+    Route::get('/dashboard/estado/{id}/{accion}', [AdminDashboardController::class, 'cambiarEstado'])
+        ->where('accion', 'aprobar|rechazar')
+        ->name('admin.dashboard.estado');
 
     // Chats de soporte. El middleware 'admin' ya exige sesion, asi que no hace
     // falta volver a anadir 'auth' aqui.

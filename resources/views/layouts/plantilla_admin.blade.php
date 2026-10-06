@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solicítalo — @yield('title', 'Panel Admin')</title>
 
+  {{-- El JS del panel resuelve solicitudes por fetch y necesita el token para
+       el POST con CSRF. Sin esta etiqueta la petición sale con 419. --}}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
 
