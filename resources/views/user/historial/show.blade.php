@@ -81,6 +81,27 @@
                         <dd>{{ $solicitud->sol_fecha_resolucion->format('d/m/Y H:i') }}</dd>
                     </div>
                 @endif
+
+                @php
+                    // Quien tiene la solicitud ahora mismo: el ultimo movimiento
+                    // del historial. El estudiante debe poder ver en todo momento
+                    // quien la esta atendiendo y con que rol.
+                    $atendidaPor = $historial
+                        ->sortByDesc('hes_fecha_cambio')
+                        ->first()?->responsable;
+                @endphp
+
+                <div class="datos__fila">
+                    <dt>Atendida por</dt>
+                    <dd>
+                        @if ($atendidaPor)
+                            {{ $atendidaPor->nombre_completo }}
+                            <span style="color: var(--gray-500);">({{ $atendidaPor->rol_etiqueta }})</span>
+                        @else
+                            <span style="color: var(--gray-400);">Aún sin asignar</span>
+                        @endif
+                    </dd>
+                </div>
             </dl>
 
             <div class="panel__hint" style="margin-top: 18px;">

@@ -25,6 +25,8 @@ class Usuario extends Authenticatable
         'usu_numero_documento',
         'usu_correo_electronico',
         'usu_numero_telefono',
+        'usu_pnf',
+        'usu_trayecto',
         'usu_contrasena_hash',
         'usu_estado_cuenta',
         'usu_fecha_registro',
@@ -143,5 +145,17 @@ class Usuario extends Authenticatable
     public function esAdministrativo(): bool
     {
         return in_array($this->usu_rol, Rol::administrativos(), true);
+    }
+
+    /**
+     * Rol listo para mostrar en pantalla (p. ej. "Administrador").
+     *
+     * Se usa junto al nombre completo cuando hay que decir quien atendio una
+     * solicitud: en el historial el estudiante debe saber no solo el nombre de
+     * la persona sino tambien el rol con el que lo hizo.
+     */
+    public function getRolEtiquetaAttribute(): string
+    {
+        return Rol::etiqueta((string) $this->usu_rol);
     }
 }

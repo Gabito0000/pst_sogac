@@ -79,7 +79,10 @@
                 <p class="timeline__meta">
                     {{ Carbon::parse($movimiento->hes_fecha_cambio)->format('d/m/Y \a \l\a\s H:i') }}
                     @if ($movimiento->responsable)
-                        &middot; {{ $movimiento->responsable->nombre_completo }}
+                        &middot;
+                        Atendida por
+                        <strong>{{ $movimiento->responsable->nombre_completo }}</strong>
+                        <span class="timeline__rol">({{ $movimiento->responsable->rol_etiqueta }})</span>
                     @endif
                 </p>
 

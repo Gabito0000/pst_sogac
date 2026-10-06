@@ -24,8 +24,10 @@ class UserSolicitudController extends Controller
             ->filter(fn ($t) => $t->estaDisponible())
             ->values();
 
-        // Solicitudes propias del estudiante logueado
-        $misSolicitudesTodas = Solicitud::with(['tipoSolicitud', 'estadoActual'])
+        // Solicitudes propias del estudiante logueado. Se carga el historial de
+        // estados con su responsable para poder mostrar, en la columna "Atendida
+        // por", quien la esta trabajando; sin el eager load seria un N+1.
+        $misSolicitudesTodas = Solicitud::with(['tipoSolicitud', 'estadoActual', 'historialEstados.responsable'])
             ->where('sol_usu_id', Auth::id())
             ->get();
 

@@ -72,16 +72,32 @@
                             <th>Tipo</th>
                             <th>Asunto</th>
                             <th>Estado</th>
+                            <th>Atendida por</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($pendientesList as $s)
-                            @php $estado = strtolower($s->estadoActual->eso_nombre_estado); @endphp
+                            @php
+                                $estado = strtolower($s->estadoActual->eso_nombre_estado);
+                                $responsable = $s->historialEstados
+                                    ->sortByDesc('hes_fecha_cambio')
+                                    ->first()?->responsable;
+                            @endphp
                             <tr>
                                 <td>{{ \Carbon\Carbon::parse($s->sol_fecha_creacion)->format('d/m/Y') }}</td>
                                 <td>{{ $s->tipoSolicitud->tsi_nombre_tipo }}</td>
                                 <td>{{ $s->sol_motivo_detallado ?? 'Sin motivo detallado' }}</td>
                                 <td><span class="badge badge--{{ $estado }}">{{ $estado }}</span></td>
+                                <td style="font-size: 0.85rem; color: var(--gray-700);">
+                                    @if ($responsable)
+                                        {{ $responsable->nombre_completo }}
+                                        <span style="display: block; color: var(--gray-400); font-size: 0.78rem;">
+                                            {{ $responsable->rol_etiqueta }}
+                                        </span>
+                                    @else
+                                        <span style="color: var(--gray-400);">Sin asignar</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
