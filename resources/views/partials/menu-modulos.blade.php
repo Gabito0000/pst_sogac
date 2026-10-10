@@ -116,6 +116,14 @@
         ],
         [
             'ambito' => 'admin',
+            'titulo' => 'Taquilla',
+            'visible' => $usuario?->esAdministrador(),
+            'funciones' => [
+                ['ruta' => 'admin.citas.index', 'texto' => 'Gestión de Citas', 'patrones' => ['admin.citas.*']],
+            ],
+        ],
+        [
+            'ambito' => 'admin',
             'titulo' => 'Historial de cambios',
             'visible' => $usuario?->esAdministrador(),
             'funciones' => [
@@ -230,7 +238,8 @@
             'ambito' => 'estudiante',
             'titulo' => 'Calendario',
             'funciones' => [
-                ['ruta' => 'user.citas', 'texto' => 'Mis citas', 'patrones' => ['user.citas*']],
+                ['ruta' => 'user.citas', 'texto' => 'Mis citas', 'patrones' => ['user.citas']],
+                ['ruta' => 'user.citas.create', 'texto' => 'Crear nueva cita', 'patrones' => ['user.citas.create']],
             ],
         ],
         // Ayuda son dos pantallas que se atienden juntas: las preguntas frecuentes y

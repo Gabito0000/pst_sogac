@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('chat:cerrar-inactivos')->daily();
+
+Schedule::command('citas:notificar')->everyMinute();
