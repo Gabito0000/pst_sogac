@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminSolicitudController;
 use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\AdminTratadasController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminCitaController;
 use App\Http\Controllers\AyudaController;
 use App\Http\Controllers\HistorialSolicitudController;
 use App\Http\Controllers\LoginController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserDatosPerfilController;
 use App\Http\Controllers\UserSolicitudController;
+use App\Http\Controllers\CitaController;
 use Illuminate\Support\Facades\Route;
 
 // El homepage institucional es la pagina principal y se muestra siempre,
@@ -45,7 +47,6 @@ Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')
 
 Route::middleware('auth')->prefix('user')->group(function () {
     Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
-    Route::get('/citas', [UserSolicitudController::class, 'misCitas'])->name('user.citas');
 
     Route::get('/datos-perfil', [UserDatosPerfilController::class, 'index'])->name('user.datos-perfil');
     Route::post('/datos-perfil', [UserDatosPerfilController::class, 'update'])->name('user.datos-perfil.update');
@@ -62,6 +63,11 @@ Route::middleware('auth')->prefix('user')->group(function () {
 
     Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
     Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
+
+    // --- RUTAS DE CITAS (ESTUDIANTE) ---
+    Route::get('/citas', [CitaController::class, 'misCitas'])->name('user.citas');
+    Route::get('/citas/crear', [CitaController::class, 'create'])->name('user.citas.create');
+    Route::post('/citas', [CitaController::class, 'store'])->name('user.citas.store');
 
     // Ayuda: las preguntas frecuentes y el chat son dos sectores distintos.
     // Antes ambos vivian bajo "soporte", lo que hacia que /user/soporte
@@ -188,6 +194,12 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         ->where('accion', 'aprobar|rechazar')
         ->name('admin.dashboard.estado');
 
+
+    // --- RUTAS DE CITAS (ADMINISTRADOR) ---
+    Route::get('/citas', [AdminCitaController::class, 'index'])->name('admin.citas.index');
+    Route::patch('/citas/{id}/atendida', [AdminCitaController::class, 'marcarAtendida'])->name('admin.citas.atendida');
+    Route::patch('/citas/{id}/inasistencia', [AdminCitaController::class, 'marcarInasistencia'])->name('admin.citas.inasistencia');
+    
     // Chats de soporte. El middleware 'admin' ya exige sesion, asi que no hace
     // falta volver a anadir 'auth' aqui.
     Route::prefix('chat')->name('admin.chat.')->group(function () {
@@ -204,3 +216,10 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         Route::post('/{id}/cerrar-forzado', [SoporteController::class, 'cerrarForzado'])->name('cerrar-forzado');
     });
 });
+
+// Ruta de la API para obtener los bloques de citas disponibles en un día específico. 
+// Esta ruta es utilizada por el frontend para mostrar al estudiante qué horarios están libres para agendar una cita. 
+// Se protege con el middleware 'auth' para asegurar que solo usuarios autenticados puedan acceder a esta información.
+Route::get('/api/citas/disponibles/{fecha}', [CitaController::class, 'obtenerBloquesDisponibles'])
+    ->name('api.citas.disponibles')
+    ->middleware('auth');
