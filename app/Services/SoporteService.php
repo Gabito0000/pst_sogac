@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\NuevoMensajeSoporte;
 use App\Models\ChatSoporte\HiloChat;
 use App\Models\ChatSoporte\MensajeChat;
+use App\Models\Rol;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -41,6 +42,13 @@ class SoporteService
 
     public function enviarMensaje($hiloId, $remitenteId, $cuerpo, $archivoImagen = null)
     {
+        $hilo = HiloChat::findOrFail($hiloId);
+
+        // El chat debe estar en un estado donde se pueden enviar mensajes
+        if (! in_array($hilo->hch_estado, ['pendiente', 'activo', 'pendiente_cierre'])) {
+            throw new Exception('No se pueden enviar mensajes a un chat en el estado '.$hilo->hch_estado.'.');
+        }
+
         $rutaImagen = null;
 
         if ($archivoImagen) {
@@ -97,6 +105,11 @@ class SoporteService
     public function escalarChat($hiloId, ?int $actorId, bool $loPideElEstudiante)
     {
         $hilo = HiloChat::findOrFail($hiloId);
+
+        // --- NUEVA COMPROBACIÓN: el estudiante solo puede escalar SU propio chat ---
+        if ($loPideElEstudiante && $hilo->hch_id_usuario !== $actorId) {
+            throw new Exception('No puedes escalar un chat que no te pertenece.');
+        }
 
         if ($hilo->hch_estado === 'cerrado') {
             throw new Exception('Este chat ya está cerrado: no se puede escalar.');
@@ -192,12 +205,16 @@ class SoporteService
                 'hch_id_admin' => null,
             ]);
 
-            // La aprobación y nuevo nivel quedan registradas en el chat.
+            // La aprobación y nuevo nivel quedan registradas en el chat. La
+            // tabla de niveles vive en HiloChat: pedirla con self:: aqui
+            // reventaba con "undefined constant" y el chat se quedaba
+            // bloqueado en pending_escalation.
             MensajeChat::create([
                 'mch_id_hilo' => $hilo->hch_id,
                 'mch_id_remitente' => $adminId,
-                'mch_cuerpo' => 'Escalado aprobado por la coordinación: sube de nivel '.(self::NIVELES_ATENCION[$nivelAnterior] ?? $nivelAnterior).' a '
-                    .(self::NIVELES_ATENCION[$hilo->hch_nivel_atencion] ?? $hilo->hch_nivel_atencion).'.',
+                'mch_cuerpo' => 'Escalado aprobado por la coordinación: sube de nivel '
+                    .(HiloChat::NIVELES_ATENCION[$nivelAnterior] ?? $nivelAnterior).' a '
+                    .(HiloChat::NIVELES_ATENCION[$hilo->hch_nivel_atencion] ?? $hilo->hch_nivel_atencion).'.',
             ]);
 
             return $hilo;
@@ -294,6 +311,7 @@ class SoporteService
         $estado = [
             'hilosPendientes' => collect(),
             'hilosActivosAdmin' => collect(),
+            'solicitudesEscalado' => collect(),
             'hiloActivo' => null,
         ];
 
@@ -302,6 +320,18 @@ class SoporteService
             // nuevos (nivel 1) los puede reclamar cualquiera de la cola, pero
             // uno escalado a analista (2) ya no aparece para el taquillero.
             $nivelMaximo = HiloChat::nivelRequeridoPorRol($usuario->usu_rol);
+
+            // Las solicitudes de escalado van aparte y sin aplicar el filtro de
+            // nivel: no son un chat para reclamar, son una peticion que hay
+            // que resolver antes que nada. Solo la ven el administrador y el
+            // analista; el taquillo queda fuera porque es justo a quien el
+            // estudiante pidio superarse.
+            $estado['solicitudesEscalado'] = in_array($usuario->usu_rol, Rol::venEscaladosDeChat(), true)
+                ? HiloChat::with('usuario')
+                    ->where('hch_estado', 'pending_escalation')
+                    ->orderBy('updated_at', 'asc')
+                    ->get()
+                : collect();
 
             $estado['hilosPendientes'] = HiloChat::with('usuario')
                 ->where('hch_estado', 'pendiente')

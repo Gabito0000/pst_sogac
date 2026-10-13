@@ -21,7 +21,8 @@
             @if ($mensaje->mch_ruta_imagen)
                 <img class="chat-burbuja__imagen"
                      src="{{ asset('storage/'.$mensaje->mch_ruta_imagen) }}"
-                     alt="Evidencia adjunta por {{ $propio ? 'el estudiante' : 'el administrador' }}">
+                     alt="Evidencia adjunta por {{ $propio ? 'el estudiante' : 'el administrador' }}"
+                     onerror="this.style.display='none'">
             @endif
 
             <span class="chat-burbuja__meta">

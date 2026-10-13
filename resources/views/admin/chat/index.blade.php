@@ -21,6 +21,86 @@
         </div>
     </div>
 
+    {{-- Peticiones de escalado: aquí decide el administrador si la consulta
+         sube de nivel. Van antes que la cola porque no son chats para
+         reclamar, sino algo que hay que resolver. --}}
+    @if ($solicitudesEscalado->isNotEmpty())
+        <div class="card" style="margin-bottom: 22px; border-color: var(--red);">
+            <div class="card__head">
+                <div>
+                    <h2 class="card__title">
+                        Solicitan un administrador
+                        <span class="chip chip--warn">{{ $solicitudesEscalado->count() }}</span>
+                    </h2>
+                    <p class="card__sub">
+                        Un estudiante pidió que atienda su consulta alguien de más arriba.
+                        @if (auth()->user()->esAdministrador())
+                            Apruebas para que suba de nivel, o rechazas si ya la estás resolviendo.
+                        @else
+                            Queda a decisión del administrador si se aprueba o se rechaza.
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">#</th>
+                            <th>Estudiante</th>
+                            <th style="width: 150px;">Nivel actual</th>
+                            <th style="width: 150px;">Abierta</th>
+                            <th class="table__acciones" style="width: 300px;">Decisión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($solicitudesEscalado as $hilo)
+                            <tr>
+                                <td style="color: var(--gray-400);">#{{ $hilo->hch_id }}</td>
+
+                                <td>
+                                    <strong>{{ $hilo->usuario->usu_primer_nombre ?? 'Usuario' }} {{ $hilo->usuario->usu_primer_apellido ?? '' }}</strong>
+                                    <div style="font-size: 0.85rem; color: var(--gray-700);">
+                                        {{ $hilo->usuario->usu_correo_electronico ?? '' }}
+                                    </div>
+                                </td>
+
+                                <td style="font-size: 0.85rem;">{{ $hilo->nivel_etiqueta }}</td>
+
+                                <td style="color: var(--gray-700); font-size: 0.85rem; white-space: nowrap;">
+                                    {{ $hilo->created_at->format('d/m/Y') }}
+                                </td>
+
+                                <td class="table__acciones">
+                                    <a href="{{ route('admin.chat.mostrar', $hilo->hch_id) }}" class="btn btn--ghost btn--sm">
+                                        Ver chat
+                                    </a>
+
+                                    {{-- Solo el administrador aprueba o rechaza: el
+                                         analista ve la peticion para estar al tanto,
+                                         pero la decision es de arriba. --}}
+                                    @if (auth()->user()->esAdministrador())
+                                        <form method="POST" action="{{ route('admin.chat.aprobar-escalado', $hilo->hch_id) }}" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn--primary btn--sm">Aprobar</button>
+                                        </form>
+
+                                        <form method="POST" action="{{ route('admin.chat.rechazar-escalado', $hilo->hch_id) }}" style="display: inline;">
+                                            @csrf
+                                            <input type="hidden" name="motivo" value="La consulta se puede resolver en el nivel actual.">
+                                            <button type="submit" class="btn btn--ghost btn--sm">Rechazar</button>
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     {{-- Sin reclamar: la cola de trabajo del equipo. --}}
     <div class="card" style="margin-bottom: 22px;">
         <div class="card__head">

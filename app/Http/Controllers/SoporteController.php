@@ -118,12 +118,19 @@ class SoporteController extends Controller
                 ! $usuario->esAdministrativo(),
             );
 
-            // Si el chat quedó pendiente de aprobación, redirect al index
-            // con un aviso; si ya fue aplicado, redirige según el rol.
+            // El chat quedó esperando la decisión del administrador. Cada rol
+            // vuelve a su propia pantalla: mandar al estudiante a la bandeja
+            // del admin lo dejaba en un 403 al pulsar "solicitar escalamiento".
             if ($hilo->hch_estado === 'pending_escalation') {
+                if ($usuario->esAdministrativo()) {
+                    return redirect()
+                        ->route('admin.chat.index')
+                        ->with('info', 'Solicitud de escalado enviada. El administrador la revisará y aplicará.');
+                }
+
                 return redirect()
-                    ->route('admin.chat.index')
-                    ->with('info', 'Solicitud de escalado enviada. El administrador la revisará y aplicará.');
+                    ->route('user.ayuda.chat.mostrar', $hilo->hch_id)
+                    ->with('info', 'Solicitamos que un administrador atienda tu consulta. Te avisaremos cuando la apruebe.');
             }
 
             // Si el escalado ya se aplicó (estado cambiado), redirige normal.
