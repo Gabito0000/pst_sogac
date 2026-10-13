@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Rol;
 use App\Models\Usuario;
+use App\Rules\SoloDigitos;
+use App\Rules\SoloLetras;
 use Illuminate\Http\Request;
 use RuntimeException;
 
@@ -95,9 +97,15 @@ class AdminUserController extends Controller
     {
         $usuario = Usuario::findOrFail($id);
 
+        // Se validan los mismos campos que después se guardan: si un campo no se
+        // revisa aquí, su valor entra sin filtro a la base.
         $request->validate([
-            'usu_primer_nombre' => 'required|string|max:50',
-            'usu_primer_apellido' => 'required|string|max:50',
+            'usu_primer_nombre' => ['required', 'string', 'max:50', new SoloLetras],
+            'usu_segundo_nombre' => ['nullable', 'string', 'max:50', new SoloLetras],
+            'usu_primer_apellido' => ['required', 'string', 'max:50', new SoloLetras],
+            'usu_segundo_apellido' => ['nullable', 'string', 'max:50', new SoloLetras],
+            // La columna es varchar(20); sin max PostgreSQL corta el error.
+            'usu_numero_telefono' => ['nullable', 'string', 'max:20', new SoloDigitos],
             'usu_correo_electronico' => 'required|email|max:100|unique:usuarios,usu_correo_electronico,'.$id.',usu_id',
             // Jerarquía completa: administrador, analista, taquillero y estudiante
             'usu_rol' => 'required|in:'.implode(',', Rol::todos()),

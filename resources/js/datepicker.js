@@ -369,6 +369,17 @@ function enhancing() {
             return;
         }
 
+        // Un input[type=date] sin name no es un campo de formulario: no envia
+        // nada al servidor. El modulo de citas los usa solo para que el
+        // JavaScript lea su valor por id (elegir el dia antes de agendar).
+        // Tocarlos aqui los convertiria en texto y, sobre todo, se les
+        // crearia un input oculto con name vacio. Se dejan como los dejo
+        // quien los escribio.
+        if (!original.name) {
+            original.dataset.fechaListo = 'omitido';
+            return;
+        }
+
         original.dataset.fechaListo = '1';
 
         const oculto = document.createElement('input');

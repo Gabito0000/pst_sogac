@@ -6,6 +6,7 @@
   <title>Registro de Cuenta | Solicítalo</title>
   <link rel="stylesheet" href="{{ asset('style_admin.css') }}" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="{{ asset('js/campos-tipo.js') }}?v={{ filemtime(public_path('js/campos-tipo.js')) }}"></script>
 </head>
 <body>
   @include('partials.cabecera')
@@ -45,7 +46,7 @@
             </div>
           @endif
 
-          <form action="{{ route('register.post') }}" method="POST" class="form" novalidate>
+          <form action="{{ route('register.post') }}" method="POST" class="form">
             @csrf
             
             {{-- Sección: Datos Personales --}}
@@ -55,13 +56,13 @@
               <div class="form-row">
                 <div class="field @error('primer_nombre') field--invalid @enderror">
                   <label for="primer_nombre">Primer Nombre</label>
-                  <input type="text" id="primer_nombre" name="primer_nombre" value="{{ old('primer_nombre') }}" autocomplete="given-name" required autofocus />
+                  <input type="text" id="primer_nombre" name="primer_nombre" value="{{ old('primer_nombre') }}" data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras." autocomplete="given-name" required autofocus />
                   @error('primer_nombre') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="field @error('segundo_nombre') field--invalid @enderror">
                   <label for="segundo_nombre">Segundo Nombre <span class="field__hint">(Opcional)</span></label>
-                  <input type="text" id="segundo_nombre" name="segundo_nombre" value="{{ old('segundo_nombre') }}" autocomplete="additional-name" />
+                  <input type="text" id="segundo_nombre" name="segundo_nombre" value="{{ old('segundo_nombre') }}" data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras." autocomplete="additional-name" />
                   @error('segundo_nombre') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
               </div>
@@ -69,13 +70,13 @@
               <div class="form-row">
                 <div class="field @error('primer_apellido') field--invalid @enderror">
                   <label for="primer_apellido">Primer Apellido</label>
-                  <input type="text" id="primer_apellido" name="primer_apellido" value="{{ old('primer_apellido') }}" autocomplete="family-name" required />
+                  <input type="text" id="primer_apellido" name="primer_apellido" value="{{ old('primer_apellido') }}" data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras." autocomplete="family-name" required />
                   @error('primer_apellido') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="field @error('segundo_apellido') field--invalid @enderror">
                   <label for="segundo_apellido">Segundo Apellido <span class="field__hint">(Opcional)</span></label>
-                  <input type="text" id="segundo_apellido" name="segundo_apellido" value="{{ old('segundo_apellido') }}" autocomplete="additional-name" />
+                  <input type="text" id="segundo_apellido" name="segundo_apellido" value="{{ old('segundo_apellido') }}" data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras." autocomplete="additional-name" />
                   @error('segundo_apellido') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
               </div>
@@ -88,14 +89,14 @@
                       <option value="V" {{ old('nacionalidad', 'V') == 'V' ? 'selected' : '' }}>V-</option>
                       <option value="E" {{ old('nacionalidad') == 'E' ? 'selected' : '' }}>E-</option>
                     </select>
-                    <input type="text" id="cedula" name="cedula" value="{{ old('cedula') }}" pattern="[0-9]{6,8}" maxlength="8" inputmode="numeric" required />
+                    <input type="text" id="cedula" name="cedula" value="{{ old('cedula') }}" data-solo="digitos" pattern="[0-9]{6,8}" maxlength="8" inputmode="numeric" title="Solo números." required />
                   </div>
                   @error('cedula') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="field @error('telefono') field--invalid @enderror">
-                  <label for="telefono">Teléfono Móvil / WhatsApp</label>
-                  <input type="tel" id="telefono" name="telefono" value="{{ old('telefono') }}" pattern="[0-9]{11}" maxlength="11" inputmode="tel" autocomplete="tel" required />
+                  <label for="telefono">Teléfono Móvil</label>
+                  <input type="tel" id="telefono" name="telefono" value="{{ old('telefono') }}" data-solo="digitos" pattern="[0-9]{11}" maxlength="11" inputmode="tel" autocomplete="tel" title="Solo números." required />
                   @error('telefono') <span class="field__error">{{ $message }}</span> @enderror
                 </div>
               </div>
@@ -184,4 +185,3 @@
   </footer>
 </body>
 </html>
-```[cite: 1]

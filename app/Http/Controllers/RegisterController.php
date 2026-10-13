@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\TipoDocumento;
 use App\Models\Usuario;
+use App\Rules\SoloDigitos;
+use App\Rules\SoloLetras;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,15 +21,17 @@ class RegisterController extends Controller
     {
         // 1. Reglas de validación ajustadas a los nombres EXACTOS de los inputs de tu formulario Blade
         $rules = [
-            'primer_nombre' => ['required', 'string', 'max:50'],
-            'segundo_nombre' => ['nullable', 'string', 'max:50'],
-            'primer_apellido' => ['required', 'string', 'max:50'],
-            'segundo_apellido' => ['nullable', 'string', 'max:50'],
+            'primer_nombre' => ['required', 'string', 'max:50', new SoloLetras],
+            'segundo_nombre' => ['nullable', 'string', 'max:50', new SoloLetras],
+            'primer_apellido' => ['required', 'string', 'max:50', new SoloLetras],
+            'segundo_apellido' => ['nullable', 'string', 'max:50', new SoloLetras],
             'nacionalidad' => ['required', 'string', 'in:V,E'],
-            'cedula' => ['required', 'string', 'max:8', 'regex:/^[0-9]+$/', 'unique:usuarios,usu_numero_documento'],
-            'telefono' => ['required', 'string', 'max:11'],
-            'pnf' => ['required', 'string', 'max:50'],
-            'trayecto' => ['required', 'string', 'max:50'],
+            'cedula' => ['required', 'string', 'max:8', new SoloDigitos, 'unique:usuarios,usu_numero_documento'],
+            'telefono' => ['required', 'string', 'max:11', new SoloDigitos],
+            // Los desplegables solo ofrecen estas opciones: la regla impide que
+            // una petición a mano guarde un PNF o trayecto inventado.
+            'pnf' => ['required', 'string', 'in:Informatica,Agroalimentacion,Administracion,Mantenimiento,Electricidad'],
+            'trayecto' => ['required', 'string', 'in:Inicial,1,2,3,4'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:usuarios,usu_correo_electronico'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
@@ -41,7 +45,9 @@ class RegisterController extends Controller
             'cedula.unique' => 'Este número de cédula ya se encuentra registrado.',
             'telefono.required' => 'El teléfono móvil es obligatorio.',
             'pnf.required' => 'Debe seleccionar un PNF.',
+            'pnf.in' => 'El PNF seleccionado no es válido.',
             'trayecto.required' => 'Debe seleccionar el trayecto actual.',
+            'trayecto.in' => 'El trayecto seleccionado no es válido.',
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'Debes ingresar un correo electrónico válido.',
             'email.unique' => 'Este correo electrónico ya se encuentra registrado.',

@@ -270,6 +270,7 @@
         });
       });
     });
-  </script>
-</body>
+</script>
+    @stack('scripts')
+  </body>
 </html>

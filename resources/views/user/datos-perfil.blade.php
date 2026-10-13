@@ -44,33 +44,46 @@
     <form action="{{ route('user.datos-perfil.update') }}" method="POST">
         @csrf
 
-        {{-- Datos básicos de la cuenta: siempre se pueden corregir --}}
+        {{-- 1. Identificacion: lo que la oficina usa para reconocerte. Se abre
+             con la cedula porque es el dato con el que te buscan, y la carrera
+             va aparte porque no la escribes tu. --}}
         <div class="card" style="margin-bottom: 20px;">
-            <h2 class="card__title">Datos de tu cuenta</h2>
-            <p class="card__sub">Con ellos te identifica el sistema y te contacta la oficina.</p>
+            <h2 class="card__title">Tu identificación</h2>
+            <p class="card__sub">Con estos datos la oficina te ubica en el sistema.</p>
 
             <div class="form__row" style="margin-top: 16px;">
                 <div class="field">
-                    <label>Número de ficha</label>
-                    <input type="text" value="{{ $usuario->numero_ficha }}" disabled>
-                    <span class="field__hint">Lo genera el sistema: identifícate con él en las oficinas.</span>
+                    <label for="cedula">Cédula</label>
+                    <input type="text" id="cedula" value="{{ $usuario->usu_numero_documento }}" disabled>
+                    <span class="field__hint">Es con lo que te buscan. Si está mal, pide el cambio en el chat.</span>
                 </div>
                 <div class="field">
-                    <label>Carrera / PNF y trayecto</label>
-                    <input type="text" value="{{ trim(($usuario->usu_pnf ?: 'Sin PNF asignado').' · '.($usuario->usu_trayecto ?: 'sin trayecto')) }}" disabled>
-                    <span class="field__hint">Los asigna la coordinación: si están mal, escribe por el chat.</span>
+                    <label for="pnf">Carrera y trayecto</label>
+                    <input type="text" id="pnf"
+                           value="{{ trim(($usuario->usu_pnf ?: 'Sin PNF asignado').' · '.($usuario->usu_trayecto ?: 'sin trayecto')) }}"
+                           disabled>
+                    <span class="field__hint">Los asigna la coordinación. Si están mal, escribe por el chat.</span>
                 </div>
             </div>
+        </div>
 
-            <div class="form__row">
+        {{-- 2. Nombre: primero los nombres, luego los apellidos, en el mismo
+             orden en que aparecen en la cédula. --}}
+        <div class="card" style="margin-bottom: 20px;">
+            <h2 class="card__title">Tu nombre</h2>
+            <p class="card__sub">Tal como aparece en tu cédula.</p>
+
+            <div class="form__row" style="margin-top: 16px;">
                 <div class="field">
                     <label for="usu_primer_nombre">Primer nombre</label>
                     <input type="text" id="usu_primer_nombre" name="usu_primer_nombre" required
+                           data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras."
                            maxlength="50" value="{{ old('usu_primer_nombre', $usuario->usu_primer_nombre) }}">
                 </div>
                 <div class="field">
                     <label for="usu_segundo_nombre">Segundo nombre</label>
                     <input type="text" id="usu_segundo_nombre" name="usu_segundo_nombre"
+                           data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras."
                            maxlength="50" value="{{ old('usu_segundo_nombre', $usuario->usu_segundo_nombre) }}">
                 </div>
             </div>
@@ -79,11 +92,13 @@
                 <div class="field">
                     <label for="usu_primer_apellido">Primer apellido</label>
                     <input type="text" id="usu_primer_apellido" name="usu_primer_apellido" required
+                           data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras."
                            maxlength="50" value="{{ old('usu_primer_apellido', $usuario->usu_primer_apellido) }}">
                 </div>
                 <div class="field">
                     <label for="usu_segundo_apellido">Segundo apellido</label>
                     <input type="text" id="usu_segundo_apellido" name="usu_segundo_apellido"
+                           data-solo="letras" pattern="(?=.*\p{L})[\p{L}\s'\-]+" title="Solo letras."
                            maxlength="50" value="{{ old('usu_segundo_apellido', $usuario->usu_segundo_apellido) }}">
                 </div>
             </div>
@@ -93,60 +108,65 @@
                     <label for="usu_correo_electronico">Correo electrónico</label>
                     <input type="email" id="usu_correo_electronico" name="usu_correo_electronico" required
                            maxlength="100" value="{{ old('usu_correo_electronico', $usuario->usu_correo_electronico) }}">
-                    <span class="field__hint">Es tu usuario de acceso: si lo cambias, usa el nuevo la próxima vez.</span>
+                    <span class="field__hint">Es tu usuario de acceso: si lo cambias, entra con el nuevo la próxima vez.</span>
                 </div>
             </div>
         </div>
 
-        {{-- Datos de precarga: los que el administrador habilitó --}}
-        <div class="card" style="margin-bottom: 20px;">
-            <h2 class="card__title">Datos que se precargan en tus trámites</h2>
-            <p class="card__sub">
-                El administrador decide qué datos se piden.
-                @if ($ultimaActualizacion)
-                    Última actualización: <strong>{{ $ultimaActualizacion->format('d/m/Y H:i') }}</strong>.
-                @endif
-            </p>
+        {{-- 3. Y 4. Los campos de precarga, repartidos en bloques: primero los
+             personales y despues los de contacto. El administrador decide
+             cuales estan habilitados; ver App\Models\DatosPrecargaConfig::BLOQUES. --}}
+        @if (! empty($bloques))
+            @foreach ($bloques as $titulo => $bloque)
+                <div class="card" style="margin-bottom: 20px;">
+                    <h2 class="card__title">{{ $titulo }}</h2>
+                    <p class="card__sub">{{ $bloque['descripcion'] }}</p>
 
-            @if ($campos->isEmpty())
-                <p class="estado-vacio" style="text-align: left;">
+                    <div class="form__row" style="margin-top: 16px;">
+                        @foreach ($bloque['campos'] as $config)
+                            <div class="field">
+                                <label for="{{ $config->dpc_campo }}">
+                                    {{ $config->dpc_etiqueta }}
+                                    @if ($config->dpc_obligatorio)
+                                        <span class="badge badge--rechazada">Obligatorio</span>
+                                    @else
+                                        <span class="badge badge--activo">Opcional</span>
+                                    @endif
+                                </label>
+
+                                @if ($config->dpc_campo === 'usu_fecha_nacimiento')
+                                    <input type="date" id="{{ $config->dpc_campo }}" name="{{ $config->dpc_campo }}"
+                                           @required($config->dpc_obligatorio)
+                                           value="{{ old($config->dpc_campo, $usuario->{$config->dpc_campo}) }}">
+                                @else
+                                    <input type="text" id="{{ $config->dpc_campo }}" name="{{ $config->dpc_campo }}"
+                                           @required($config->dpc_obligatorio) maxlength="255"
+                                           @if ($config->dpc_campo === 'usu_numero_telefono')
+                                               data-solo="digitos" pattern="[0-9]*" title="Solo números."
+                                           @endif
+                                           value="{{ old($config->dpc_campo, $usuario->{$config->dpc_campo}) }}">
+                                @endif
+
+                                <span class="field__hint">
+                                    @if ($config->dpc_vigencia_meses !== null)
+                                        Vigente durante {{ $config->dpc_vigencia_meses }} meses tras cada actualización.
+                                    @else
+                                        No pierde vigencia.
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="card" style="margin-bottom: 20px;">
+                <h2 class="card__title">Datos que se adjuntan a tus trámites</h2>
+                <p class="estado-vacio" style="text-align: left; margin-top: 12px;">
                     La administración todavía no ha habilitado ningún dato de precarga.
                 </p>
-            @else
-                <div class="form__row" style="margin-top: 16px;">
-                    @foreach ($campos as $config)
-                        <div class="field">
-                            <label for="{{ $config->dpc_campo }}">
-                                {{ $config->dpc_etiqueta }}
-                                @if ($config->dpc_obligatorio)
-                                    <span class="badge badge--rechazada">Obligatorio</span>
-                                @else
-                                    <span class="badge badge--activo">Opcional</span>
-                                @endif
-                            </label>
-
-                            @if ($config->dpc_campo === 'usu_fecha_nacimiento')
-                                <input type="date" id="{{ $config->dpc_campo }}" name="{{ $config->dpc_campo }}"
-                                       @required($config->dpc_obligatorio)
-                                       value="{{ old($config->dpc_campo, $usuario->{$config->dpc_campo}) }}">
-                            @else
-                                <input type="text" id="{{ $config->dpc_campo }}" name="{{ $config->dpc_campo }}"
-                                       @required($config->dpc_obligatorio) maxlength="255"
-                                       value="{{ old($config->dpc_campo, $usuario->{$config->dpc_campo}) }}">
-                            @endif
-
-                            <span class="field__hint">
-                                @if ($config->dpc_vigencia_meses !== null)
-                                    Vigente durante {{ $config->dpc_vigencia_meses }} meses tras cada actualización.
-                                @else
-                                    No pierde vigencia.
-                                @endif
-                            </span>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+            </div>
+        @endif
 
         <div class="actions">
             <button type="submit" class="btn btn--primary">Guardar cambios</button>
@@ -154,3 +174,7 @@
         </div>
     </form>
 @endsection
+
+@push('scripts')
+    <script defer src="{{ asset('js/campos-tipo.js') }}?v={{ filemtime(public_path('js/campos-tipo.js')) }}"></script>
+@endpush

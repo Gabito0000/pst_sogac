@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cita;
-use App\Models\DatosPrecargaConfig;
 use App\Models\EstadoSolicitud;
 use App\Models\LapsoAcademico;
 use App\Models\Solicitud;
 use App\Models\TipoSolicitud;
+use App\Pnf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -90,37 +90,35 @@ class UserSolicitudController extends Controller
 
         $usuario = Auth::user();
 
-        // Una sola consulta de configuración para todo el formulario: qué
-        // datos se adjuntarán, cuáles faltan y si siguen vigentes.
-        $campos = DatosPrecargaConfig::camposActivos();
+        // Datos que identifican al estudiante y se adjuntan a la solicitud.
+        //
+        // Antes se mostraban los campos de precarga configurados por el
+        // administrador (lugar y fecha de nacimiento, direccion, telefono).
+        // Para resolver un tramite ninguno de esos sirve: lo que la oficina
+        // necesita es saber quien lo pido y de que programa viene. Estos se
+        // leen de la ficha del estudiante, no de la configuracion, asi que
+        // siempre estan disponibles y no dependen de que el admin habilite
+        // un campo.
+        $datosIdentificacion = [
+            'Nombre' => $usuario->getNombreCompletoAttribute(),
+            'Cédula' => $usuario->usu_numero_documento,
+            'Carrera (PNF)' => $usuario->usu_pnf ?: 'Sin PNF asignado',
+            'Semestre / Trayecto' => Pnf::nombreTrayecto($usuario->usu_trayecto),
+            'Teléfono' => $usuario->usu_numero_telefono ?: 'Sin teléfono registrado',
+        ];
 
-        $datosPrecarga = [];
-        foreach ($campos as $config) {
-            $valor = $usuario->{$config->dpc_campo};
-            $datosPrecarga[$config->dpc_campo] = $valor !== null && $valor !== '' ? (string) $valor : null;
+        $faltanClaves = [];
+
+        foreach ($datosIdentificacion as $etiqueta => $valor) {
+            if (str_starts_with($valor, 'Sin ')) {
+                $faltanClaves[] = $etiqueta;
+            }
         }
-
-        $faltanObligatorios = $campos
-            ->filter(fn ($config) => $config->dpc_obligatorio)
-            ->filter(fn ($config) => ($datosPrecarga[$config->dpc_campo] ?? null) === null)
-            ->values();
-
-        // La vigencia se mide con el campo que más dura: si el más laxo ya
-        // venció, los demás también.
-        $mesesVigencia = $campos
-            ->filter(fn ($config) => $config->dpc_vigencia_meses !== null)
-            ->min('dpc_vigencia_meses');
-
-        $precargaVencida = $mesesVigencia !== null
-            && ($usuario->usu_datos_ultima_actualizacion === null
-                || $usuario->usu_datos_ultima_actualizacion->lt(now()->subMonths((int) $mesesVigencia)));
 
         return view('user.solicitar', [
             'tramite' => $tramite,
-            'datosPrecarga' => $datosPrecarga,
-            'camposPrecarga' => $campos,
-            'faltanObligatorios' => $faltanObligatorios,
-            'precargaVencida' => $precargaVencida,
+            'datosIdentificacion' => $datosIdentificacion,
+            'faltanClaves' => $faltanClaves,
         ]);
     }
 

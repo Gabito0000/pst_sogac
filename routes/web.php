@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminCitaController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminDatosEstudiantesController;
 use App\Http\Controllers\AdminDatosPrecargaController;
@@ -11,8 +12,8 @@ use App\Http\Controllers\AdminSolicitudController;
 use App\Http\Controllers\AdminTipoSolicitudController;
 use App\Http\Controllers\AdminTratadasController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminCitaController;
 use App\Http\Controllers\AyudaController;
+use App\Http\Controllers\CitaController;
 use App\Http\Controllers\HistorialSolicitudController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
@@ -20,7 +21,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\UserDatosPerfilController;
 use App\Http\Controllers\UserSolicitudController;
-use App\Http\Controllers\CitaController;
+use App\Models\Rol;
 use Illuminate\Support\Facades\Route;
 
 // El homepage institucional es la pagina principal y se muestra siempre,
@@ -45,47 +46,52 @@ Route::post('/restablecer-contrasena', [PasswordResetController::class, 'updateP
 
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')->middleware('auth');
 
-Route::middleware('auth')->prefix('user')->group(function () {
-    Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
+// Portal del estudiante. El personal usa el panel administrativo: sin el filtro
+// de rol, un administrador que entraba aqui veia el portal estudiantil vacio,
+// con sus menus y cero solicitudes propias.
+Route::middleware(['auth', 'rol:'.Rol::implode(Rol::studentPortal())])
+    ->prefix('user')
+    ->group(function () {
+        Route::get('/dashboard', [UserSolicitudController::class, 'index'])->name('dashboard');
 
-    Route::get('/datos-perfil', [UserDatosPerfilController::class, 'index'])->name('user.datos-perfil');
-    Route::post('/datos-perfil', [UserDatosPerfilController::class, 'update'])->name('user.datos-perfil.update');
+        Route::get('/datos-perfil', [UserDatosPerfilController::class, 'index'])->name('user.datos-perfil');
+        Route::post('/datos-perfil', [UserDatosPerfilController::class, 'update'])->name('user.datos-perfil.update');
 
-    Route::get('/tramites', [UserSolicitudController::class, 'listarTramites'])->name('user.tramites.index');
+        Route::get('/tramites', [UserSolicitudController::class, 'listarTramites'])->name('user.tramites.index');
 
-    // Historial de solicitudes del estudiante. Antes era una sola pagina plana
-    // (user.solicitudes.historial, en /user/historial) con cuatro columnas; ahora
-    // es un sector con listado filtrable y ficha de detalle.
-    Route::prefix('historial')->name('user.historial.')->group(function () {
-        Route::get('/', [HistorialSolicitudController::class, 'index'])->name('index');
-        Route::get('/{solicitud}', [HistorialSolicitudController::class, 'show'])->name('show');
-    });
+        // Historial de solicitudes del estudiante. Antes era una sola pagina plana
+        // (user.solicitudes.historial, en /user/historial) con cuatro columnas; ahora
+        // es un sector con listado filtrable y ficha de detalle.
+        Route::prefix('historial')->name('user.historial.')->group(function () {
+            Route::get('/', [HistorialSolicitudController::class, 'index'])->name('index');
+            Route::get('/{solicitud}', [HistorialSolicitudController::class, 'show'])->name('show');
+        });
 
-    Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
-    Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
+        Route::get('/tramites/{id}/solicitar', [UserSolicitudController::class, 'create'])->name('user.tramites.solicitar');
+        Route::post('/tramites/{id}/solicitar', [UserSolicitudController::class, 'store'])->name('user.tramites.store');
 
-    // --- RUTAS DE CITAS (ESTUDIANTE) ---
-    Route::get('/citas', [CitaController::class, 'misCitas'])->name('user.citas');
-    Route::get('/citas/crear', [CitaController::class, 'create'])->name('user.citas.create');
-    Route::post('/citas', [CitaController::class, 'store'])->name('user.citas.store');
+        // --- RUTAS DE CITAS (ESTUDIANTE) ---
+        Route::get('/citas', [CitaController::class, 'misCitas'])->name('user.citas');
+        Route::get('/citas/crear', [CitaController::class, 'create'])->name('user.citas.create');
+        Route::post('/citas', [CitaController::class, 'store'])->name('user.citas.store');
 
-    // Ayuda: las preguntas frecuentes y el chat son dos sectores distintos.
-    // Antes ambos vivian bajo "soporte", lo que hacia que /user/soporte
-    // mostrara las FAQ y el chat quedara escondido debajo del mismo nombre.
-    Route::prefix('ayuda')->name('user.ayuda.')->group(function () {
-        Route::get('/preguntas', [AyudaController::class, 'preguntas'])->name('preguntas');
+        // Ayuda: las preguntas frecuentes y el chat son dos sectores distintos.
+        // Antes ambos vivian bajo "soporte", lo que hacia que /user/soporte
+        // mostrara las FAQ y el chat quedara escondido debajo del mismo nombre.
+        Route::prefix('ayuda')->name('user.ayuda.')->group(function () {
+            Route::get('/preguntas', [AyudaController::class, 'preguntas'])->name('preguntas');
 
-        Route::prefix('chat')->name('chat.')->group(function () {
-            Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
-            Route::post('/iniciar', [SoporteController::class, 'iniciarChat'])->name('iniciar');
-            Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
-            Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
-            Route::post('/{id}/confirmar', [SoporteController::class, 'confirmarCierre'])->name('confirmar');
-            Route::post('/{id}/rechazar', [SoporteController::class, 'desconfirmarCierre'])->name('rechazar');
-            Route::post('/{id}/escalar', [SoporteController::class, 'escalarChat'])->name('escalar');
+            Route::prefix('chat')->name('chat.')->group(function () {
+                Route::get('/', [SoporteController::class, 'verHistorial'])->name('index');
+                Route::post('/iniciar', [SoporteController::class, 'iniciarChat'])->name('iniciar');
+                Route::get('/{id}', [SoporteController::class, 'mostrarChat'])->name('mostrar');
+                Route::post('/{id}/mensaje', [SoporteController::class, 'enviarMensaje'])->name('enviar');
+                Route::post('/{id}/confirmar', [SoporteController::class, 'confirmarCierre'])->name('confirmar');
+                Route::post('/{id}/rechazar', [SoporteController::class, 'desconfirmarCierre'])->name('rechazar');
+                Route::post('/{id}/escalar', [SoporteController::class, 'escalarChat'])->name('escalar');
+            });
         });
     });
-});
 
 // ============================================================
 // GRUPO ADMIN
@@ -100,7 +106,7 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // ---- Solo el ADMINISTRADOR ----
 
     // Panel estadístico: métricas precisas de todo el proceso de las solicitudes.
-    Route::middleware('rol:administrador')->group(function () {
+    Route::middleware('rol:'.Rol::implode(Rol::conEstadisticas()))->group(function () {
         Route::get('/estadisticas', [AdminEstadisticasController::class, 'index'])->name('admin.estadisticas');
         Route::get('/estadisticas/exportar', [AdminEstadisticasController::class, 'exportar'])->name('admin.estadisticas.exportar');
     });
@@ -109,14 +115,14 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // Es un sector aparte y no una pestaña del panel estadístico porque mide
     // cosas distintas: el panel resume los números del proceso de solicitudes y
     // la bitácora deja constancia de cada modificación, con su autor.
-    Route::middleware('rol:administrador')->prefix('cambios')->name('admin.cambios.')->group(function () {
+    Route::middleware('rol:'.Rol::implode(Rol::conBitacora()))->prefix('cambios')->name('admin.cambios.')->group(function () {
         Route::get('/', [AdminHistorialCambioController::class, 'index'])->name('index');
         Route::get('/exportar', [AdminHistorialCambioController::class, 'exportar'])->name('exportar');
     });
 
     // ---- Administrador y analista ----
 
-    Route::middleware('rol:administrador,analista')->group(function () {
+    Route::middleware('rol:'.Rol::implode(Rol::conCatalogos()))->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         // Solicitudes tratadas: todo lo que ya se movió de estado (aprobadas,
@@ -148,7 +154,7 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     });
 
     // Gestión de usuarios: solo el administrador
-    Route::middleware('rol:administrador')->prefix('usuarios')->name('admin.usuarios.')->group(function () {
+    Route::middleware('rol:'.Rol::implode([Rol::ADMINISTRADOR]))->prefix('usuarios')->name('admin.usuarios.')->group(function () {
         Route::get('/', [AdminUserController::class, 'index'])->name('index');
         Route::get('/buscar', [AdminUserController::class, 'search'])->name('search'); // AJAX
         Route::post('/agregar', [AdminUserController::class, 'agregarPorCorreo'])->name('agregar');
@@ -161,7 +167,7 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     // el admin edita) y qué tiene cargado cada estudiante, con filtros para
     // ubicar quién está incompleto o desactualizado. Ambos módulos son del
     // administrador porque afectan la forma en que se reciben los trámites.
-    Route::middleware('rol:administrador')->group(function () {
+    Route::middleware('rol:'.Rol::implode(Rol::conEstadisticas()))->group(function () {
         Route::prefix('datos-precarga')->name('admin.datos-precarga.')->group(function () {
             Route::get('/', [AdminDatosPrecargaController::class, 'index'])->name('index');
             Route::get('/agregar', [AdminDatosPrecargaController::class, 'create'])->name('create');
@@ -194,12 +200,11 @@ Route::middleware('admin')->prefix('admin')->group(function () {
         ->where('accion', 'aprobar|rechazar')
         ->name('admin.dashboard.estado');
 
-
     // --- RUTAS DE CITAS (ADMINISTRADOR) ---
     Route::get('/citas', [AdminCitaController::class, 'index'])->name('admin.citas.index');
     Route::patch('/citas/{id}/atendida', [AdminCitaController::class, 'marcarAtendida'])->name('admin.citas.atendida');
     Route::patch('/citas/{id}/inasistencia', [AdminCitaController::class, 'marcarInasistencia'])->name('admin.citas.inasistencia');
-    
+
     // Chats de soporte. El middleware 'admin' ya exige sesion, asi que no hace
     // falta volver a anadir 'auth' aqui.
     Route::prefix('chat')->name('admin.chat.')->group(function () {
@@ -217,8 +222,8 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     });
 });
 
-// Ruta de la API para obtener los bloques de citas disponibles en un día específico. 
-// Esta ruta es utilizada por el frontend para mostrar al estudiante qué horarios están libres para agendar una cita. 
+// Ruta de la API para obtener los bloques de citas disponibles en un día específico.
+// Esta ruta es utilizada por el frontend para mostrar al estudiante qué horarios están libres para agendar una cita.
 // Se protege con el middleware 'auth' para asegurar que solo usuarios autenticados puedan acceder a esta información.
 Route::get('/api/citas/disponibles/{fecha}', [CitaController::class, 'obtenerBloquesDisponibles'])
     ->name('api.citas.disponibles')

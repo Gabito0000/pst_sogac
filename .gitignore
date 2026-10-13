@@ -31,3 +31,8 @@ Thumbs.db
 # volumen, pero no se publica en el repositorio.
 /docker/postgres/*.sql
 *.sql.gz
+
+# Notas personales de trabajo y guias locales de pruebas (credenciales de
+# buzones de prueba, listas de pendientes). Son de quien trabaja aqui, no del
+# proyecto.
+/-documentacion/

@@ -44,12 +44,18 @@ class DatosPrecargaConfigSeeder extends Seeder
             'dpc_obligatorio' => true,
             'dpc_vigencia_meses' => null,
         ],
-        [
-            'dpc_campo' => 'usu_lapso_academico_previo',
-            'dpc_etiqueta' => 'Último lapso académico aprobado',
-            'dpc_obligatorio' => true,
-            'dpc_vigencia_meses' => 12,
-        ],
+        // 'usu_lapso_academico_previo' ("Último lapso académico aprobado") se
+        // retiró del perfil: no se entendía para qué lo pide el estudiante y
+        // quedaba como un campo obligatorio sin criterio claro de llenado.
+        //
+        // La columna NO se borra de usuarios: sigue ahi, vacia y sin uso, por
+        // si mas adelante se decide reincorporarlo. Si se llegara a quitar,
+        // seria una migracion nueva, no editar la que ya se ejecuto.
+        //
+        // Quitarlo de esta lista evita que aparezca de nuevo en una base
+        // nueva. En las que ya lo tienen, hay que desactivarlo a mano:
+        //   UPDATE datos_precarga_config SET dpc_activo = false
+        //   WHERE dpc_campo = 'usu_lapso_academico_previo';
     ];
 
     public function run(): void

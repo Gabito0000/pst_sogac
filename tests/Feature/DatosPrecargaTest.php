@@ -338,12 +338,12 @@ test('el panel de datos de estudiantes queda fuera del alcance del analista y de
 |--------------------------------------------------------------------------
 */
 
-test('el formulario del trámite muestra los datos que se adjuntarán', function () {
+test('el formulario del tramite muestra los datos que se adjuntan', function () {
     $estudiante = datosPrecargaUsuario();
     $estudiante->update([
-        'usu_direccion' => 'Av. 4 con calle 5',
-        'usu_fecha_nacimiento' => '2000-05-14',
-        'usu_datos_ultima_actualizacion' => now(),
+        'usu_pnf' => 'Informatica',
+        'usu_trayecto' => '3',
+        'usu_numero_telefono' => '04141234567',
     ]);
 
     $tramite = TipoSolicitud::firstOrCreate(
@@ -354,11 +354,19 @@ test('el formulario del trámite muestra los datos que se adjuntarán', function
     $this->actingAs($estudiante)
         ->get(route('user.tramites.solicitar', $tramite->tsi_id))
         ->assertOk()
-        ->assertSee('Av. 4 con calle 5')
-        ->assertSee('2000-05-14');
+    // Lo que la oficina necesita para saber a quien le pertenece el tramite.
+        ->assertSee('Nombre')
+        ->assertSee('Cédula')
+        ->assertSee('Informatica')
+        ->assertSee('Trayecto III')
+        ->assertSee('04141234567')
+    // La ficha censal no se adjunta: no sirve para resolver un tramite.
+        ->assertDontSee('Lugar de nacimiento')
+        ->assertDontSee('Fecha de nacimiento');
 });
-
-test('el trámite avisa cuando falta un dato obligatorio de la precarga', function () {
+test('el trámite avisa cuando falta un dato clave de identificación', function () {
+    // Sin PNF ni teléfono no hay forma de saber a quién pertenece el trámite,
+    // así que el formulario avisa antes de enviar.
     $estudiante = datosPrecargaUsuario();
     $tramite = TipoSolicitud::firstOrCreate(
         ['tsi_nombre_tipo' => 'Constancia de estudio'],
@@ -368,5 +376,7 @@ test('el trámite avisa cuando falta un dato obligatorio de la precarga', functi
     $this->actingAs($estudiante)
         ->get(route('user.tramites.solicitar', $tramite->tsi_id))
         ->assertOk()
-        ->assertSee('Dirección');
+        ->assertSee('Antes de enviar')
+        ->assertSee('Carrera (PNF)')
+        ->assertSee('Teléfono');
 });

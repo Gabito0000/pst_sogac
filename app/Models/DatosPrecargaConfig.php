@@ -92,6 +92,69 @@ class DatosPrecargaConfig extends Model
     }
 
     /**
+     * En qué bloques se reparten los campos del formulario del estudiante.
+     *
+     * El orden de arriba hacia abajo es el que lee la persona. Antes todos los
+     * campos salian en una sola lista, en el orden en que se insertaron en la
+     * base, que no significa nada para quien los llena: el teléfono quedaba
+     * debajo de la fecha de nacimiento y la dirección en medio.
+     *
+     * @var array<string, array{0: string, 1: array<int, string>}>
+     */
+    private const BLOQUES = [
+        'Datos personales' => [
+            'Lo que te identifica como persona.',
+            ['usu_lugar_nacimiento', 'usu_fecha_nacimiento'],
+        ],
+        'Contacto y dirección' => [
+            'Cómo te localiza la oficina cuando necesita hablar contigo.',
+            ['usu_numero_telefono', 'usu_direccion'],
+        ],
+    ];
+
+    /**
+     * Reparte los campos en bloques y en el orden en que deben mostrarse.
+     *
+     * Un campo que no esté en la lista de ningún bloque no se pierde: cae en
+     * 'Otros datos' al final. Así, si el administrador activa un campo nuevo
+     * desde su panel, aparece en el formulario sin que haya que tocar código.
+     *
+     * @param  Collection<int, self>  $campos
+     * @return array<string, array{0: string, 1: Collection<int, self>}>
+     */
+    public static function enBloques(Collection $campos): array
+    {
+        $bloques = [];
+
+        foreach (self::BLOQUES as $titulo => [$descripcion, $orden]) {
+            $delBloque = $campos
+                ->filter(fn (self $c) => in_array($c->dpc_campo, $orden, true))
+                ->sortBy(fn (self $c) => array_search($c->dpc_campo, $orden, true))
+                ->values();
+
+            // Un bloque sin campos habilitados no se dibuja.
+            if ($delBloque->isNotEmpty()) {
+                $bloques[$titulo] = ['descripcion' => $descripcion, 'campos' => $delBloque];
+            }
+        }
+
+        $sinUbicar = $campos->reject(
+            fn (self $c) => collect(self::BLOQUES)
+                ->flatMap(fn ($b) => $b[1])
+                ->contains($c->dpc_campo)
+        )->values();
+
+        if ($sinUbicar->isNotEmpty()) {
+            $bloques['Otros datos'] = [
+                'descripcion' => 'Datos que la administración habilitó y todavía no tienen un bloque asignado.',
+                'campos' => $sinUbicar,
+            ];
+        }
+
+        return $bloques;
+    }
+
+    /**
      * Columnas ofertables que todavía no están configuradas: de ahí elige
      * el administrador cuando agrega un campo de precarga nuevo.
      *

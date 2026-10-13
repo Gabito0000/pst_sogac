@@ -339,11 +339,11 @@ test('cambiar el estado de una solicitud por GET no exige token CSRF', function 
     expect($despues)->not->toBe($antes, 'documenta que el GET sí cambia el estado sin CSRF');
 });
 
-test('un rol administrativo puede entrar al panel del estudiante', function () {
-    // Las rutas /user/* solo exigen 'auth', no un rol. El modelo de roles dice
-    // que el panel /user es del estudiante, asi que un administrativo deberia
-    // ser expulsado (403) o redirigido. Se comprueba que no revienta y que
-    // ademas se documente que hoy si puede entrar.
+test('el personal no entra al portal del estudiante', function () {
+    // Las rutas /user/* exigen rol estudiante. Antes solo pedian sesion, asi que
+    // un administrador que llegaba por URL veía el portal estudiantil con el
+    // menu del estudiante y cero solicitudes propias: una pantalla que no
+    // significaba nada y que ademas hacia dudar de donde empieza un panel.
     $usuarios = [
         'administrador' => admin('V-90000030'),
         'analista' => usuarioConRol(Rol::ANALISTA, 'V-90000031'),
@@ -351,25 +351,50 @@ test('un rol administrativo puede entrar al panel del estudiante', function () {
     ];
 
     $destinos = [
-        'inicio' => route('dashboard'),
-        'tramites' => route('user.tramites.index'),
-        'historial' => route('user.historial.index'),
-        'preguntas' => route('user.ayuda.preguntas'),
+        'inicio' => 'dashboard',
+        'tramites' => 'user.tramites.index',
+        'historial' => 'user.historial.index',
+        'preguntas' => 'user.ayuda.preguntas',
+        'perfil' => 'user.datos-perfil',
+        'citas' => 'user.citas',
     ];
 
-    $entradas = [];
+    $fallos = [];
 
     foreach ($usuarios as $rol => $usuario) {
-        foreach ($destinos as $nombre => $url) {
-            $estado = $this->actingAs($usuario)->get($url)->status();
-            $entradas[] = "{$rol}/{$nombre}: {$estado}";
+        foreach ($destinos as $nombre => $ruta) {
+            $estado = estadoDe($this->actingAs($usuario)->get(route($ruta)));
+
+            if ($estado !== 403) {
+                $fallos[] = "{$rol} entro a /{$nombre} con HTTP {$estado}, deberia ser 403";
+            }
         }
     }
 
-    // Se deja constancia de como responde hoy el sistema.
-    expect($entradas)->toContain('administrador/inicio: 200');
+    expect($fallos)->toBe([], implode("\n  ", $fallos));
 });
 
+test('el estudiante si entra a todo su portal', function () {
+    // El otro lado del mismo filtro: la separacion no puede cerrar la puerta
+    // al rol que si debe entrar.
+    sembrarAuditoria();
+
+    $estudiante = estudiante('V-90000033');
+
+    $destinos = [
+        'inicio' => 'dashboard',
+        'tramites' => 'user.tramites.index',
+        'historial' => 'user.historial.index',
+        'preguntas' => 'user.ayuda.preguntas',
+        'citas' => 'user.citas',
+    ];
+
+    foreach ($destinos as $nombre => $ruta) {
+        $estado = estadoDe($this->actingAs($estudiante)->get(route($ruta)));
+
+        expect($estado)->toBe(200, "el estudiante deberia entrar a /{$nombre}, dio HTTP {$estado}");
+    }
+});
 test('el HTML de las pantallas no trae texto corrupto ni csrf faltante', function () {
     // Un archivo Blade se puede guardar con el nombre del mes o la tilde
     // mal codificados sin que PHP se queje: el error sale en pantalla. Se

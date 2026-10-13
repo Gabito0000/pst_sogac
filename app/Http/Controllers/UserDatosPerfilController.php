@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\DatosPrecargaConfig;
+use App\Rules\SoloDigitos;
+use App\Rules\SoloLetras;
 use App\Services\RegistroCambios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,19 +26,22 @@ class UserDatosPerfilController extends Controller
      * Reglas de validación de cada campo de precarga, sin la parte de
      * obligatoriedad: esa la aporta la configuración del admin.
      *
-     * @var array<string, string>
+     * @return array<string, string|array<int, mixed>>
      */
-    private const REGLAS_PRECARGA = [
-        'usu_numero_telefono' => 'string|max:20',
-        'usu_direccion' => 'string|max:255',
-        'usu_lugar_nacimiento' => 'string|max:100',
-        // La fecha de nacimiento no puede ser futura: un dato "actual" es el
-        // primer filtro de calidad antes de que llegue a un trámite.
-        'usu_fecha_nacimiento' => 'date|before_or_equal:today',
-        'usu_lapso_academico_previo' => 'string|max:50',
-        'usu_pnf' => 'string|max:50',
-        'usu_trayecto' => 'string|max:20',
-    ];
+    private static function reglasPrecargaBase(): array
+    {
+        return [
+            'usu_numero_telefono' => ['string', 'max:20', new SoloDigitos],
+            'usu_direccion' => 'string|max:255',
+            'usu_lugar_nacimiento' => 'string|max:100',
+            // La fecha de nacimiento no puede ser futura: un dato "actual" es el
+            // primer filtro de calidad antes de que llegue a un trámite.
+            'usu_fecha_nacimiento' => 'date|before_or_equal:today',
+            'usu_lapso_academico_previo' => 'string|max:50',
+            'usu_pnf' => 'string|max:50',
+            'usu_trayecto' => 'string|max:20',
+        ];
+    }
 
     /**
      * Formulario con los datos de la cuenta y los de precarga configurados.
@@ -53,6 +58,7 @@ class UserDatosPerfilController extends Controller
 
         return view('user.datos-perfil', [
             'usuario' => $usuario,
+            'bloques' => DatosPrecargaConfig::enBloques($campos),
             'campos' => $campos,
             'vencidos' => $vencidos,
             'ultimaActualizacion' => $usuario->usu_datos_ultima_actualizacion,
@@ -105,10 +111,10 @@ class UserDatosPerfilController extends Controller
     private function reglasCuenta(): array
     {
         return [
-            'usu_primer_nombre' => 'required|string|max:50',
-            'usu_segundo_nombre' => 'nullable|string|max:50',
-            'usu_primer_apellido' => 'required|string|max:50',
-            'usu_segundo_apellido' => 'nullable|string|max:50',
+            'usu_primer_nombre' => ['required', 'string', 'max:50', new SoloLetras],
+            'usu_segundo_nombre' => ['nullable', 'string', 'max:50', new SoloLetras],
+            'usu_primer_apellido' => ['required', 'string', 'max:50', new SoloLetras],
+            'usu_segundo_apellido' => ['nullable', 'string', 'max:50', new SoloLetras],
             'usu_correo_electronico' => [
                 'required',
                 'string',
@@ -131,8 +137,14 @@ class UserDatosPerfilController extends Controller
         $reglas = [];
 
         foreach (DatosPrecargaConfig::camposActivos() as $config) {
-            $base = self::REGLAS_PRECARGA[$config->dpc_campo] ?? 'string|max:255';
-            $reglas[$config->dpc_campo] = ($config->dpc_obligatorio ? 'required|' : 'nullable|').$base;
+            $base = self::reglasPrecargaBase()[$config->dpc_campo] ?? 'string|max:255';
+
+            // La obligatoriedad la decide el admin; el resto de reglas son las
+            // del tipo de dato (un array si incluye objetos Rule).
+            $reglas[$config->dpc_campo] = array_merge(
+                [$config->dpc_obligatorio ? 'required' : 'nullable'],
+                is_array($base) ? $base : explode('|', $base)
+            );
         }
 
         return $reglas;
